@@ -1,4 +1,3 @@
-
 name: leloms_app
 description: LELOMS - Tu compañero de estudio
 publish_to: 'none'
@@ -16,7 +15,7 @@ dependencies:
   firebase_storage: ^12.4.4
   google_sign_in: ^6.2.2
   file_picker: ^8.1.4
-  flutter_pdftext: ^1.3.0
+  pdftext: ^0.2.0
   http: ^1.2.2
   shared_preferences: ^2.3.5
   image_picker: ^1.1.2
