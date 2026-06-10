@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'features/home/home_page.dart';
 
 void main() {
   runApp(const LelomsApp());
@@ -16,23 +17,5 @@ class LelomsApp extends StatelessWidget {
       home: const HomePage(),
     );
   }
-}
+}	
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          '🌙 LELOMS',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
