@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../wellness/wellness_page.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
