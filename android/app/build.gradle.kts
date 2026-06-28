@@ -6,32 +6,31 @@ plugins {
 }
 
 android {
-    namespace = "com.leloms.app"
-    compileSdk = 36
-    ndkVersion = flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+    namespace = "com.leloms_app"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.leloms.app"
-        minSdk = 23
+        applicationId = "com.leloms_app"
+        minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-        isMultiDexEnabled = true
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -40,9 +39,5 @@ flutter {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
+    implementation("androidx.multidex:multidex:2.0.1")
 }
