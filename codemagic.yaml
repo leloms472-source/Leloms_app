@@ -20,11 +20,6 @@ workflows:
     artifacts:
       - build/**/outputs/**/*.apk
       - build/**/outputs/**/mapping.txt
-    artifacts:
-  - build/**/outputs/**/*.apk
-  - build/**/outputs/**/mapping.txt
-
-ios-workflow:
       
   ios-workflow:
     name: iOS Build  
