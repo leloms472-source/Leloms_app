@@ -1,0 +1,14 @@
+Analyzing Leloms_app...                                         
+
+warning • Unused import: '../wellness/wellness_page.dart' • lib/features/home/home_page.dart:3:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:89:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:92:112 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:142:59 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/features/wellness/wellness_page.dart:145:310 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:157:72 • deprecated_member_use
+  error • Methods can't be invoked in constant expressions • lib/features/wellness/wellness_page.dart:174:49 • const_eval_method_invocation
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:174:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:174:103 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:176:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/wellness/wellness_page.dart:208:138 • deprecated_member_use
+

@@ -171,7 +171,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFFD4AF37).withOpacity(0.2), Color(0xFFD4AF37).withOpacity(0.05)]),
+        gradient: LinearGradient(colors: [Color(0xFFD4AF37).withOpacity(0.2), Color(0xFFD4AF37).withOpacity(0.05)]),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.3)),
       ),
