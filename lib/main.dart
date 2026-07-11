@@ -138,7 +138,7 @@ class _AchievementListener extends StatefulWidget {
 class _AchievementListenerState extends State<_AchievementListener> {
   int _lastXpCheck = 0;
   int _lastStreakCheck = 0;
-  int _lastTreeCheck = 0;
+  TreeStage _lastTreeStageCheck = TreeStage.seed;
 
   @override
   void didChangeDependencies() {
@@ -168,8 +168,8 @@ class _AchievementListenerState extends State<_AchievementListener> {
       if (user.streak >= 30) achievements.tryUnlock(AchievementId.monthStreak);
     }
 
-    if (sanctuary.treeStage != _lastTreeCheck) {
-      _lastTreeCheck = sanctuary.treeStage.index;
+    if (sanctuary.treeStage != _lastTreeStageCheck) {
+      _lastTreeStageCheck = sanctuary.treeStage;
       if (sanctuary.treeStage == TreeStage.mature) {
         achievements.tryUnlock(AchievementId.treeGrower);
       }
