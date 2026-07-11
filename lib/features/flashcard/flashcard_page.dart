@@ -1,5 +1,6 @@
 import 'dart:math' show pi;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/flashcard.dart';
@@ -51,6 +52,7 @@ class _FlashcardPageState extends State<FlashcardPage>
 
   void _toggleFlip() {
     if (_isFlipped) return;
+    HapticFeedback.lightImpact();
     setState(() => _isFlipped = true);
     _flipController.forward();
   }
@@ -58,6 +60,7 @@ class _FlashcardPageState extends State<FlashcardPage>
   void _rateCard(int quality) {
     final card = widget.flashcards[_currentIndex];
     Sm2Algorithm.applyReview(card, quality);
+    HapticFeedback.selectionClick();
     _learnedCount++;
     setState(() => _isRated = true);
     Future.delayed(const Duration(milliseconds: 400), _nextCard);

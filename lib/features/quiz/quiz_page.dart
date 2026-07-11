@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/quiz.dart';
@@ -50,11 +51,15 @@ class _QuizPageState extends State<QuizPage> {
 
   void _selectAnswer(int index) {
     if (_isAnswered) return;
+    HapticFeedback.selectionClick();
     setState(() {
       _selectedAnswer = index;
       _isAnswered = true;
       if (index == _currentQuizQuestion.correctIndex) {
         _correctCount++;
+        HapticFeedback.successNotification();
+      } else {
+        HapticFeedback.warningNotification();
       }
     });
   }
