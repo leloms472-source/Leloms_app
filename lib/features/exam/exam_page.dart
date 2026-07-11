@@ -194,7 +194,6 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
-            setState(() => _showConfirmExit = true);
             showDialog(
               context: context,
               builder: (ctx) => AlertDialog(

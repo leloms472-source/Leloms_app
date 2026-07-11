@@ -13,6 +13,7 @@ import '../sanctuary/sanctuary_page.dart';
 import '../study/study_timer_page.dart';
 import '../analytics/analytics_page.dart';
 import '../exam/exam_config_page.dart';
+import '../search/global_search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,8 +70,8 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: AppColors.lightText),
-            onPressed: () {},
+            icon: const Icon(Icons.search_rounded, color: AppColors.lightText),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalSearchPage())),
           ),
         ],
       ),
