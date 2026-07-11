@@ -25,10 +25,11 @@
 - Flashcard page (flashcard_page.dart): swipe-free tap-to-flip design with 3D animation, "Aprendida" tracking, XP reward on session completion.
 - Dart analyzer: 0 errors, 0 warnings.
 
-## In Progress
-- Real IA API integration.
-- Push notifications.
-- Unit/widget tests.
+## Done
+- IA page: real OpenAI-compatible API integration with config dialog (API key + base URL), conversation history, mock fallback when unconfigured.
+- Push notifications: firebase_messaging + flutter_local_notifications with study reminders, streak alerts, quiz reminders, daily scheduling.
+- Unit tests: UserProvider (XP/leveling/streak/name), SanctuaryProvider (tree stages/progress/cat interactions).
+- Widget test: SanctuaryPage renders correctly.
 
 ## Key Decisions
 - Provider instead of Riverpod/Bloc: simpler for current scope, ChangeNotifier pattern, easy migration later.
