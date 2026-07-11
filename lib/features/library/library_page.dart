@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
+import '../quiz/quiz_list_page.dart';
+import '../flashcard/flashcard_list_page.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -317,45 +319,53 @@ class _LibraryPageState extends State<LibraryPage> {
           mainAxisSpacing: 12,
           childAspectRatio: 1.5,
           children: [
-            _buildResourceType(Icons.picture_as_pdf_rounded, 'PDFs', '24', AppColors.anatomyRed),
-            _buildResourceType(Icons.quiz_rounded, 'Quizzes', '12', AppColors.physiologyBlue),
-            _buildResourceType(Icons.account_tree_rounded, 'Mapas', '8', AppColors.biochemistryGreen),
-            _buildResourceType(Icons.credit_card_rounded, 'Flashcards', '15', AppColors.pharmacologyOrange),
+            _buildResourceType(Icons.picture_as_pdf_rounded, 'PDFs', '24', AppColors.anatomyRed, null),
+            _buildResourceType(Icons.quiz_rounded, 'Quizzes', '12', AppColors.physiologyBlue, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizListPage()))),
+            _buildResourceType(Icons.account_tree_rounded, 'Mapas', '8', AppColors.biochemistryGreen, null),
+            _buildResourceType(Icons.credit_card_rounded, 'Flashcards', '15', AppColors.pharmacologyOrange, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FlashcardListPage()))),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildResourceType(IconData icon, String label, String count, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
+  Widget _buildResourceType(IconData icon, String label, String count, Color color, VoidCallback? onTap) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 24),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.darkCard,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
           ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600)),
-                Text(count, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold)),
-              ],
-            ),
+          child: Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600)),
+                    Text(count, style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
