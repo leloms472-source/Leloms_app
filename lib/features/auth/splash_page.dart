@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import 'login_page.dart';
 import '../home/home_page.dart';
+import '../onboarding/onboarding_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -84,6 +86,25 @@ class _SplashPageState extends State<SplashPage>
     await Future.delayed(const Duration(milliseconds: 3200));
     if (!mounted) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+
+    if (!onboardingComplete) {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => OnboardingPage(
+            onComplete: () => _navigateToHome(),
+          ),
+        ),
+      );
+      return;
+    }
+
+    _navigateToHome();
+  }
+
+  void _navigateToHome() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userProvider = context.read<UserProvider>();

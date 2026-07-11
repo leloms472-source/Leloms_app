@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/achievement_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../sanctuary/sanctuary_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -294,6 +295,13 @@ class _ProfilePageState extends State<ProfilePage> {
           value: _soundEnabled,
           activeThumbColor: AppColors.primary,
           onChanged: (v) => setState(() => _soundEnabled = v),
+        ),
+        SwitchListTile(
+          title: const Text('Tema Oscuro', style: TextStyle(color: AppColors.lightText)),
+          subtitle: const Text('Alternar entre tema claro y oscuro', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+          value: context.watch<ThemeProvider>().isDark,
+          activeThumbColor: AppColors.primary,
+          onChanged: (_) => context.read<ThemeProvider>().toggle(),
         ),
       ]),
     );

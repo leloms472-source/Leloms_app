@@ -9,48 +9,60 @@ import 'providers/user_provider.dart';
 import 'providers/sanctuary_provider.dart' show SanctuaryProvider, TreeStage;
 import 'providers/study_provider.dart';
 import 'providers/achievement_provider.dart';
+import 'providers/theme_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  final themeProvider = ThemeProvider();
+  await themeProvider.initialize();
+
   final notificationService = NotificationService();
   await notificationService.initialize();
-  
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  runApp(const LelomsApp());
+  runApp(LelomsApp(themeProvider: themeProvider));
 }
 
 class LelomsApp extends StatelessWidget {
-  const LelomsApp({super.key});
+  final ThemeProvider themeProvider;
+  const LelomsApp({super.key, required this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
         ChangeNotifierProvider(create: (_) => StudyProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
       ],
       child: _AchievementListener(
-        child: MaterialApp(
-          title: 'LELOMS',
-          debugShowCheckedModeBanner: false,
-          theme: _buildTheme(),
-          home: const SplashPage(),
+        child: Consumer<ThemeProvider>(
+          builder: (context, theme, child) {
+            return MaterialApp(
+              title: 'LELOMS',
+              debugShowCheckedModeBanner: false,
+              theme: _buildDarkTheme(),
+              darkTheme: _buildDarkTheme(),
+              themeMode: theme.themeMode,
+              home: const SplashPage(),
+            );
+          },
         ),
       ),
     );
   }
 
-  ThemeData _buildTheme() {
+  ThemeData _buildDarkTheme() {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -75,9 +87,7 @@ class LelomsApp extends StatelessWidget {
         color: AppColors.darkCard,
         elevation: 2,
         shadowColor: AppColors.overlay.withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -85,9 +95,7 @@ class LelomsApp extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -95,15 +103,11 @@ class LelomsApp extends StatelessWidget {
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
-        ),
+        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -117,9 +121,7 @@ class LelomsApp extends StatelessWidget {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.darkCard,
         indicatorColor: AppColors.primary.withValues(alpha: 0.2),
-        labelTextStyle: WidgetStateProperty.all(
-          AppTypography.labelMedium,
-        ),
+        labelTextStyle: WidgetStateProperty.all(AppTypography.labelMedium),
       ),
     );
   }
