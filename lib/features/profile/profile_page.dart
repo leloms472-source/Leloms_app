@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../sanctuary/sanctuary_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -217,34 +218,40 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildSanctuaryPlaceholder() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [AppColors.primary.withValues(alpha: 0.1), AppColors.secondary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage())),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [AppColors.primary.withValues(alpha: 0.1), AppColors.secondary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Column(children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.2)),
+            child: const Icon(Icons.pets_rounded, size: 40, color: AppColors.primary),
+          ),
+          const SizedBox(height: 16),
+          const Text('Mi Santuario', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+          const SizedBox(height: 8),
+          const Text('Toca para visitar tu santuario\ny cuidar de Leloms', textAlign: TextAlign.center, style: TextStyle(color: AppColors.secondaryText, fontSize: 14, height: 1.5)),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.pets_rounded, size: 16, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Visitar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            ]),
+          ),
+        ]),
       ),
-      child: Column(children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.2)),
-          child: const Icon(Icons.pets_rounded, size: 40, color: AppColors.primary),
-        ),
-        const SizedBox(height: 16),
-        const Text('Mi Santuario', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-        const SizedBox(height: 8),
-        const Text('Tu santuario mágico está en construcción.\nMuy pronto podrás cuidar a tu mascota académica.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.secondaryText, fontSize: 14, height: 1.5)),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
-          child: const Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.hourglass_empty_rounded, size: 16, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('Próximamente', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12)),
-          ]),
-        ),
-      ]),
     );
   }
 

@@ -9,6 +9,7 @@ import '../library/library_page.dart';
 import '../wellness/wellness_page.dart';
 import '../calendar/calendar_page.dart';
 import '../profile/profile_page.dart';
+import '../sanctuary/sanctuary_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -134,6 +135,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          _buildDrawerItem(Icons.pets_rounded, 'Santuario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage()))),
           _buildDrawerItem(Icons.school_rounded, 'Biblioteca', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()))),
           _buildDrawerItem(Icons.self_improvement_rounded, 'Bienestar', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WellnessPage()))),
           _buildDrawerItem(Icons.calendar_month_rounded, 'Calendario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()))),

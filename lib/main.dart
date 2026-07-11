@@ -6,6 +6,7 @@ import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
 import 'features/auth/splash_page.dart';
 import 'providers/user_provider.dart';
+import 'providers/sanctuary_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class LelomsApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
       ],
       child: MaterialApp(
         title: 'LELOMS',
