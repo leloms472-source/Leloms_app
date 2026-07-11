@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../providers/user_provider.dart';
 import '../ia/ia_page.dart';
 import '../ia/community_page.dart';
 import '../library/library_page.dart';
@@ -17,18 +20,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _showToast = false;
-  String _toastMessage = '';
-
-  final String _userName = 'Alex';
-  final int _streak = 12;
-  final int _level = 24;
-  final int _currentXp = 1250;
-  final int _nextLevelXp = 1500;
 
   final List<Map<String, dynamic>> _todayTasks = [
-    {'title': 'Examen de Anatomía', 'subtitle': 'Sistema Cardiovascular • 3 días', 'color': const Color(0xFFEF4444), 'icon': Icons.warning_amber_rounded},
-    {'title': 'Entrega de Reporte', 'subtitle': 'Bioquímica • Mañana 23:59', 'color': const Color(0xFFF59E0B), 'icon': Icons.assignment_rounded},
-    {'title': 'Clase de Fisiología', 'subtitle': 'Lab 105 • 10:00 AM', 'color': const Color(0xFF3B82F6), 'icon': Icons.science_rounded},
+    {'title': 'Examen de Anatomía', 'subtitle': 'Sistema Cardiovascular • 3 días', 'color': AppColors.error, 'icon': Icons.warning_amber_rounded},
+    {'title': 'Entrega de Reporte', 'subtitle': 'Bioquímica • Mañana 23:59', 'color': AppColors.warning, 'icon': Icons.assignment_rounded},
+    {'title': 'Clase de Fisiología', 'subtitle': 'Lab 105 • 10:00 AM', 'color': AppColors.info, 'icon': Icons.science_rounded},
   ];
 
   @override
@@ -40,10 +36,7 @@ class _HomePageState extends State<HomePage> {
   void _simulateToast() {
     Timer(const Duration(seconds: 2), () {
       if (mounted) {
-        setState(() {
-          _showToast = true;
-          _toastMessage = '📚 Alguien subió material nuevo en Anatomía';
-        });
+        setState(() => _showToast = true);
         Timer(const Duration(seconds: 3), () {
           if (mounted) setState(() => _showToast = false);
         });
@@ -52,10 +45,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    
+    setState(() => _selectedIndex = index);
     if (index == 1) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()));
     } else if (index == 2) {
@@ -65,15 +55,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>();
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1020),
-      drawer: _buildDrawer(),
+      backgroundColor: AppColors.dark,
+      drawer: _buildDrawer(user),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Color(0xFFE2E8F0)),
+            icon: const Icon(Icons.notifications_outlined, color: AppColors.lightText),
             onPressed: () {},
           ),
         ],
@@ -85,9 +77,9 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _buildHeader(user),
                 const SizedBox(height: 20),
-                _buildStatsCard(),
+                _buildStatsCard(user),
                 const SizedBox(height: 24),
                 _buildMainActions(),
                 const SizedBox(height: 24),
@@ -103,16 +95,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(UserProvider user) {
     return Drawer(
-      backgroundColor: const Color(0xFF0B1020),
+      backgroundColor: AppColors.dark,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+                colors: [AppColors.primary, AppColors.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -131,13 +123,13 @@ class _HomePageState extends State<HomePage> {
                   child: const Icon(Icons.person_rounded, size: 35, color: Colors.white),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Alex',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  user.userName,
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const Text(
-                  'Nivel 24 • 1,250 XP',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                Text(
+                  'Nivel ${user.level} • ${user.currentXp} XP',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -146,7 +138,7 @@ class _HomePageState extends State<HomePage> {
           _buildDrawerItem(Icons.self_improvement_rounded, 'Bienestar', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WellnessPage()))),
           _buildDrawerItem(Icons.calendar_month_rounded, 'Calendario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()))),
           _buildDrawerItem(Icons.person_rounded, 'Perfil', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()))),
-          const Divider(color: Color(0xFF334155)),
+          const Divider(color: AppColors.border),
           _buildDrawerItem(Icons.settings_rounded, 'Configuración', () {}),
           _buildDrawerItem(Icons.logout_rounded, 'Cerrar sesión', () {}, isDestructive: true),
         ],
@@ -156,13 +148,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap, {bool isDestructive = false}) {
     return ListTile(
-      leading: Icon(icon, color: isDestructive ? const Color(0xFFEF4444) : const Color(0xFF94A3B8)),
-      title: Text(title, style: TextStyle(color: isDestructive ? const Color(0xFFEF4444) : const Color(0xFFE2E8F0))),
+      leading: Icon(icon, color: isDestructive ? AppColors.error : AppColors.secondaryText),
+      title: Text(title, style: TextStyle(color: isDestructive ? AppColors.error : AppColors.lightText)),
       onTap: onTap,
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(UserProvider user) {
     return Row(
       children: [
         Container(
@@ -171,7 +163,7 @@ class _HomePageState extends State<HomePage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+              colors: [AppColors.primary, AppColors.secondary],
             ),
             border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
           ),
@@ -183,12 +175,12 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Buenos días, $_userName',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE2E8F0)),
+                'Buenos días, ${user.userName}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText),
               ),
               const Text(
                 'Martes, 10 de Junio',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 14),
               ),
             ],
           ),
@@ -197,19 +189,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStatsCard() {
+  Widget _buildStatsCard(UserProvider user) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF818CF8)],
+          colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -232,14 +224,8 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Racha actual',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                    Text(
-                      '$_streak días seguidos',
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    const Text('Racha actual', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text('${user.streak} días seguidos', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -249,10 +235,7 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  'Nivel $_level',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                ),
+                child: Text('Nivel ${user.level}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
               ),
             ],
           ),
@@ -260,15 +243,15 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('$_currentXp XP', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              Text('$_nextLevelXp XP', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('${user.currentXp} XP', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('${user.nextLevelXp} XP', style: const TextStyle(color: Colors.white70, fontSize: 12)),
             ],
           ),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: _currentXp / _nextLevelXp,
+              value: user.xpProgress,
               backgroundColor: Colors.white.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               minHeight: 8,
@@ -286,7 +269,7 @@ class _HomePageState extends State<HomePage> {
           icon: Icons.smart_toy_rounded,
           title: 'IA Leloms',
           subtitle: 'Tu asistente inteligente',
-          gradient: const [Color(0xFF6366F1), Color(0xFF818CF8)],
+          gradient: const [AppColors.primary, AppColors.primaryLight],
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IaPage())),
         ),
         const SizedBox(height: 12),
@@ -294,7 +277,7 @@ class _HomePageState extends State<HomePage> {
           icon: Icons.groups_rounded,
           title: 'Comunidad',
           subtitle: 'Ranking y resúmenes',
-          gradient: const [Color(0xFFEC4899), Color(0xFFF472B6)],
+          gradient: const [AppColors.secondary, AppColors.secondaryLight],
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage())),
         ),
       ],
@@ -358,14 +341,11 @@ class _HomePageState extends State<HomePage> {
       children: [
         Row(
           children: [
-            const Text(
-              'Para Hoy',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE2E8F0)),
-            ),
+            const Text('Para Hoy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
             const Spacer(),
             TextButton(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage())),
-              child: const Text('Ver todo', style: TextStyle(color: Color(0xFF6366F1))),
+              child: const Text('Ver todo', style: TextStyle(color: AppColors.primary)),
             ),
           ],
         ),
@@ -380,7 +360,7 @@ class _HomePageState extends State<HomePage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF151B2E),
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: task['color'], width: 4)),
       ),
@@ -392,9 +372,9 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(task['title'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFFE2E8F0))),
+                Text(task['title'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.lightText)),
                 const SizedBox(height: 4),
-                Text(task['subtitle'], style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                Text(task['subtitle'], style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
               ],
             ),
           ),
@@ -411,12 +391,12 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF151B2E).withValues(alpha: 0.95),
+          color: AppColors.darkCard.withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF6366F1)),
+          border: Border.all(color: AppColors.primary),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+              color: AppColors.primary.withValues(alpha: 0.3),
               blurRadius: 10,
               spreadRadius: 2,
             ),
@@ -424,12 +404,12 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.notifications_active_rounded, color: Color(0xFF6366F1)),
+            const Icon(Icons.notifications_active_rounded, color: AppColors.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _toastMessage,
-                style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14),
+                '📚 Alguien subió material nuevo en Anatomía',
+                style: const TextStyle(color: AppColors.lightText, fontSize: 14),
               ),
             ),
           ],
@@ -440,8 +420,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBottomNav() {
     return NavigationBar(
-      backgroundColor: const Color(0xFF151B2E),
-      indicatorColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
+      backgroundColor: AppColors.darkCard,
+      indicatorColor: AppColors.primary.withValues(alpha: 0.2),
       selectedIndex: _selectedIndex,
       onDestinationSelected: _onItemTapped,
       destinations: const [
