@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class IaPage extends StatefulWidget {
   const IaPage({super.key});
@@ -7,9 +9,10 @@ class IaPage extends StatefulWidget {
   State<IaPage> createState() => _IaPageState();
 }
 
-class _IaPageState extends State<IaPage> {
+class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> _messages = [];
   final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
   String _selectedDifficulty = 'Intermedio';
 
@@ -20,9 +23,15 @@ class _IaPageState extends State<IaPage> {
     'Generar Flashcards',
   ];
 
+  late AnimationController _dotsController;
+
   @override
   void initState() {
     super.initState();
+    _dotsController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat();
     _addWelcomeMessage();
   }
 
@@ -54,9 +63,10 @@ class _IaPageState extends State<IaPage> {
     });
 
     _textController.clear();
+    _scrollToBottom();
 
-    // Simular respuesta de IA
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1) + Duration(milliseconds: Random().nextInt(2000)), () {
+      if (!mounted) return;
       setState(() {
         _isTyping = false;
         _messages.add({
@@ -65,12 +75,25 @@ class _IaPageState extends State<IaPage> {
           'time': _getCurrentTime(),
         });
       });
+      _scrollToBottom();
+    });
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
   String _generateResponse(String userMessage) {
     final lower = userMessage.toLowerCase();
-    
+
     if (lower.contains('resumir') || lower.contains('pdf')) {
       return '📄 Perfecto, sube tu PDF y generaré un resumen completo.\n\n**Modo disponible:**\n• Resumen detallado\n• Explicación simple\n\n¿Cuál prefieres?';
     } else if (lower.contains('quiz') || lower.contains('preguntas')) {
@@ -86,17 +109,24 @@ class _IaPageState extends State<IaPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF151B2E),
-        title: const Text('Selecciona dificultad', style: TextStyle(color: Color(0xFFE2E8F0))),
+        backgroundColor: AppColors.darkCard,
+        title: const Text('Selecciona dificultad', style: TextStyle(color: AppColors.lightText)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: ['Básico', 'Intermedio', 'Avanzado'].map((level) {
-            return RadioListTile<String>(
-              title: Text(level, style: const TextStyle(color: Color(0xFFE2E8F0))),
-              value: level,
-              groupValue: _selectedDifficulty,
-              onChanged: (value) {
-                setState(() => _selectedDifficulty = value!);
+            final isSelected = _selectedDifficulty == level;
+            return ListTile(
+              leading: Radio<String>(
+                value: level,
+                groupValue: _selectedDifficulty,
+                onChanged: (value) {
+                  setState(() => _selectedDifficulty = value!);
+                  Navigator.pop(context);
+                },
+              ),
+              title: Text(level, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.lightText)),
+              onTap: () {
+                setState(() => _selectedDifficulty = level);
                 Navigator.pop(context);
               },
             );
@@ -110,18 +140,14 @@ class _IaPageState extends State<IaPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF151B2E),
-        title: const Text('Subir PDF', style: TextStyle(color: Color(0xFFE2E8F0))),
+        backgroundColor: AppColors.darkCard,
+        title: const Text('Subir PDF', style: TextStyle(color: AppColors.lightText)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.upload_file_rounded, size: 60, color: Color(0xFF6366F1)),
+            const Icon(Icons.upload_file_rounded, size: 60, color: AppColors.primary),
             const SizedBox(height: 16),
-            const Text(
-              'Selecciona un archivo PDF de tu dispositivo',
-              style: TextStyle(color: Color(0xFF94A3B8)),
-              textAlign: TextAlign.center,
-            ),
+            const Text('Selecciona un archivo PDF de tu dispositivo', style: TextStyle(color: AppColors.secondaryText), textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
@@ -131,7 +157,7 @@ class _IaPageState extends State<IaPage> {
               icon: const Icon(Icons.folder_open_rounded),
               label: const Text('Seleccionar archivo'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
@@ -145,38 +171,28 @@ class _IaPageState extends State<IaPage> {
   @override
   void dispose() {
     _textController.dispose();
+    _scrollController.dispose();
+    _dotsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1020),
+      backgroundColor: AppColors.dark,
       appBar: AppBar(
         title: const Text('IA Leloms'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.history_rounded),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial - Próximamente')),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.tune_rounded),
-            onPressed: _showDifficultyDialog,
-          ),
+          IconButton(icon: const Icon(Icons.history_rounded), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.tune_rounded), onPressed: _showDifficultyDialog),
         ],
       ),
       body: Column(
         children: [
           _buildQuickActions(),
-          Expanded(
-            child: _messages.isEmpty ? _buildEmptyState() : _buildChatList(),
-          ),
+          Expanded(child: _messages.isEmpty ? _buildEmptyState() : _buildChatList()),
           if (_isTyping) _buildTypingIndicator(),
           _buildInputArea(),
         ],
@@ -195,12 +211,10 @@ class _IaPageState extends State<IaPage> {
               margin: const EdgeInsets.only(right: 8),
               child: ActionChip(
                 label: Text(action),
-                backgroundColor: const Color(0xFF151B2E),
-                labelStyle: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 12),
-                side: BorderSide(color: const Color(0xFF6366F1).withValues(alpha: 0.3)),
-                onPressed: () {
-                  _sendMessage(action);
-                },
+                backgroundColor: AppColors.darkCard,
+                labelStyle: const TextStyle(color: AppColors.lightText, fontSize: 12),
+                side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+                onPressed: () => _sendMessage(action),
               ),
             );
           }).toList(),
@@ -219,11 +233,11 @@ class _IaPageState extends State<IaPage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
-                colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+                colors: [AppColors.primary, AppColors.secondary],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                  color: AppColors.primary.withValues(alpha: 0.4),
                   blurRadius: 30,
                   spreadRadius: 10,
                 ),
@@ -232,15 +246,9 @@ class _IaPageState extends State<IaPage> {
             child: const Icon(Icons.pets_rounded, size: 60, color: Colors.white),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Hola, soy Leloms',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFE2E8F0)),
-          ),
+          const Text('Hola, soy Leloms', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.lightText)),
           const SizedBox(height: 8),
-          const Text(
-            'Tu asistente de estudio inteligente',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-          ),
+          const Text('Tu asistente de estudio inteligente', style: TextStyle(color: AppColors.secondaryText, fontSize: 14)),
         ],
       ),
     );
@@ -248,6 +256,7 @@ class _IaPageState extends State<IaPage> {
 
   Widget _buildChatList() {
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
@@ -271,7 +280,7 @@ class _IaPageState extends State<IaPage> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isUser ? const Color(0xFF6366F1) : const Color(0xFF151B2E),
+                color: isUser ? AppColors.primary : AppColors.darkCard,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
@@ -282,18 +291,9 @@ class _IaPageState extends State<IaPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    message['content'],
-                    style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14, height: 1.5),
-                  ),
+                  Text(message['content'], style: const TextStyle(color: AppColors.lightText, fontSize: 14, height: 1.5)),
                   const SizedBox(height: 4),
-                  Text(
-                    message['time'],
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 10,
-                    ),
-                  ),
+                  Text(message['time'], style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 10)),
                 ],
               ),
             ),
@@ -312,7 +312,7 @@ class _IaPageState extends State<IaPage> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+          colors: [AppColors.primary, AppColors.secondary],
         ),
       ),
       child: const Icon(Icons.pets_rounded, size: 20, color: Colors.white),
@@ -325,9 +325,9 @@ class _IaPageState extends State<IaPage> {
       height: 36,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Color(0xFF334155),
+        color: AppColors.border,
       ),
-      child: const Icon(Icons.person_rounded, size: 20, color: Color(0xFFE2E8F0)),
+      child: const Icon(Icons.person_rounded, size: 20, color: AppColors.lightText),
     );
   }
 
@@ -341,23 +341,35 @@ class _IaPageState extends State<IaPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF151B2E),
+              color: AppColors.darkCard,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                3,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF6366F1),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
+            child: AnimatedBuilder(
+              animation: _dotsController,
+              builder: (context, child) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (index) {
+                    final delay = index * 0.15;
+                    final value = ((_dotsController.value - delay) % 1.0).abs();
+                    final scale = 0.5 + (value * 0.5);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Transform.scale(
+                        scale: scale,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
             ),
           ),
         ],
@@ -369,7 +381,7 @@ class _IaPageState extends State<IaPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF151B2E),
+        color: AppColors.darkCard,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
@@ -381,16 +393,16 @@ class _IaPageState extends State<IaPage> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.attach_file_rounded, color: Color(0xFF6366F1)),
+            icon: const Icon(Icons.attach_file_rounded, color: AppColors.primary),
             onPressed: _showPdfUploadDialog,
           ),
           Expanded(
             child: TextField(
               controller: _textController,
-              style: const TextStyle(color: Color(0xFFE2E8F0)),
+              style: const TextStyle(color: AppColors.lightText),
               decoration: InputDecoration(
                 hintText: 'Escribe tu duda...',
-                hintStyle: const TextStyle(color: Color(0xFF64748B)),
+                hintStyle: const TextStyle(color: AppColors.secondaryText),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -398,7 +410,7 @@ class _IaPageState extends State<IaPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.send_rounded, color: Color(0xFF6366F1)),
+            icon: const Icon(Icons.send_rounded, color: AppColors.primary),
             onPressed: () => _sendMessage(_textController.text),
           ),
         ],
