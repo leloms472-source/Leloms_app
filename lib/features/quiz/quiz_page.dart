@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/quiz.dart';
 import '../../providers/sanctuary_provider.dart';
+import '../../providers/achievement_provider.dart';
 
 class QuizPage extends StatefulWidget {
   final Quiz quiz;
@@ -73,6 +74,11 @@ class _QuizPageState extends State<QuizPage> {
   void _finishQuiz() {
     _timer.cancel();
     context.read<SanctuaryProvider>().addStudyXp(_correctCount * 5);
+    final achievements = context.read<AchievementProvider>();
+    achievements.tryUnlock(AchievementId.firstQuiz);
+    if (_correctCount >= widget.quiz.questions.length * 0.8) {
+      achievements.tryUnlock(AchievementId.quizMaster);
+    }
     setState(() => _isFinished = true);
   }
 

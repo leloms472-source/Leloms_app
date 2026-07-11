@@ -6,8 +6,9 @@ import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
 import 'features/auth/splash_page.dart';
 import 'providers/user_provider.dart';
-import 'providers/sanctuary_provider.dart';
+import 'providers/sanctuary_provider.dart' show SanctuaryProvider, TreeStage;
 import 'providers/study_provider.dart';
+import 'providers/achievement_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -36,12 +37,15 @@ class LelomsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
         ChangeNotifierProvider(create: (_) => StudyProvider()),
+        ChangeNotifierProvider(create: (_) => AchievementProvider()),
       ],
-      child: MaterialApp(
-        title: 'LELOMS',
-        debugShowCheckedModeBanner: false,
-        theme: _buildTheme(),
-        home: const SplashPage(),
+      child: _AchievementListener(
+        child: MaterialApp(
+          title: 'LELOMS',
+          debugShowCheckedModeBanner: false,
+          theme: _buildTheme(),
+          home: const SplashPage(),
+        ),
       ),
     );
   }
@@ -118,5 +122,60 @@ class LelomsApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _AchievementListener extends StatefulWidget {
+  final Widget child;
+  const _AchievementListener({required this.child});
+
+  @override
+  State<_AchievementListener> createState() => _AchievementListenerState();
+}
+
+class _AchievementListenerState extends State<_AchievementListener> {
+  int _lastXpCheck = 0;
+  int _lastStreakCheck = 0;
+  int _lastTreeCheck = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final user = context.read<UserProvider>();
+    _lastXpCheck = user.currentXp;
+    _lastStreakCheck = user.streak;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>();
+    final sanctuary = context.watch<SanctuaryProvider>();
+    final achievements = context.read<AchievementProvider>();
+
+    if (user.currentXp != _lastXpCheck) {
+      _lastXpCheck = user.currentXp;
+      if (user.currentXp >= 100) achievements.tryUnlock(AchievementId.firstXp);
+      if (user.currentXp >= 1000) achievements.tryUnlock(AchievementId.xpCollector);
+      if (user.currentXp >= 5000) achievements.tryUnlock(AchievementId.xpHunter);
+    }
+
+    if (user.streak != _lastStreakCheck) {
+      _lastStreakCheck = user.streak;
+      if (user.streak >= 3) achievements.tryUnlock(AchievementId.firstStreak);
+      if (user.streak >= 7) achievements.tryUnlock(AchievementId.weekStreak);
+      if (user.streak >= 30) achievements.tryUnlock(AchievementId.monthStreak);
+    }
+
+    if (sanctuary.treeStage != _lastTreeCheck) {
+      _lastTreeCheck = sanctuary.treeStage.index;
+      if (sanctuary.treeStage == TreeStage.mature) {
+        achievements.tryUnlock(AchievementId.treeGrower);
+      }
+      if (sanctuary.treeStage == TreeStage.ancient) {
+        achievements.tryUnlock(AchievementId.ancientTree);
+      }
+    }
+
+    return widget.child;
   }
 }

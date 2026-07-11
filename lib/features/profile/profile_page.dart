@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/achievement_provider.dart';
 import '../sanctuary/sanctuary_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -185,34 +186,52 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildAchievements() {
-    final achievements = [
-      {'icon': Icons.star_rounded, 'unlocked': true, 'color': AppColors.gold},
-      {'icon': Icons.flash_on_rounded, 'unlocked': true, 'color': AppColors.primary},
-      {'icon': Icons.book_rounded, 'unlocked': true, 'color': AppColors.success},
-      {'icon': Icons.pets_rounded, 'unlocked': true, 'color': AppColors.secondary},
-      {'icon': Icons.lock_rounded, 'unlocked': false, 'color': AppColors.secondaryText},
-      {'icon': Icons.lock_rounded, 'unlocked': false, 'color': AppColors.secondaryText},
-    ];
+    final achievementProvider = context.watch<AchievementProvider>();
+    final recent = achievementProvider.unlocked.take(6).toList();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text('Logros Recientes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-          TextButton(onPressed: () {}, child: const Text('Ver todos', style: TextStyle(color: AppColors.primary))),
+          Text(
+            'Logros (${achievementProvider.unlockedCount}/${achievementProvider.totalCount})',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText),
+          ),
+          TextButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _AchievementsDetailPage())),
+            child: const Text('Ver todos', style: TextStyle(color: AppColors.primary)),
+          ),
         ]),
-        const SizedBox(height: 16),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: achievements.map((ach) {
-          return Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: ach['unlocked'] as bool ? (ach['color'] as Color).withValues(alpha: 0.2) : AppColors.border,
-            ),
-            child: Icon(ach['icon'] as IconData, color: ach['unlocked'] as bool ? ach['color'] as Color : AppColors.secondaryText, size: 24),
-          );
-        }).toList()),
+        if (achievementProvider.unlockedCount > 0) ...[
+          const SizedBox(height: 16),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: recent.map((ach) {
+            final unlocked = ach.unlocked;
+            return Tooltip(
+              message: '${ach.title}\n${ach.description}',
+              child: Container(
+                width: 50, height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: unlocked ? AppColors.gold.withValues(alpha: 0.2) : AppColors.border,
+                ),
+                child: Icon(
+                  IconData(ach.icon.codePoint, fontFamily: ach.icon.fontFamily),
+                  color: unlocked ? AppColors.gold : AppColors.secondaryText,
+                  size: 24,
+                ),
+              ),
+            );
+          }).toList()),
+        ] else
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(children: [
+              Icon(Icons.emoji_events_rounded, size: 48, color: AppColors.secondaryText.withValues(alpha: 0.5)),
+              const SizedBox(height: 8),
+              const Text('Completa quizzes, estudia y mantén\nrachas para ganar logros', textAlign: TextAlign.center, style: TextStyle(color: AppColors.secondaryText, fontSize: 13)),
+            ]),
+          ),
       ]),
     );
   }
@@ -305,6 +324,159 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
+      ),
+    );
+  }
+}
+
+class _AchievementsDetailPage extends StatelessWidget {
+  const _AchievementsDetailPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final achievementProvider = context.watch<AchievementProvider>();
+    final unlocked = achievementProvider.unlocked;
+    final locked = achievementProvider.locked;
+
+    return Scaffold(
+      backgroundColor: AppColors.dark,
+      appBar: AppBar(
+        title: const Text('Todos los Logros'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.gold.withValues(alpha: 0.15), AppColors.primary.withValues(alpha: 0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 64, height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.gold.withValues(alpha: 0.2),
+                  ),
+                  child: const Icon(Icons.emoji_events_rounded, color: AppColors.gold, size: 32),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${achievementProvider.unlockedCount}/${achievementProvider.totalCount}',
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.lightText),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${(achievementProvider.progress * 100).round()}% completado',
+                        style: const TextStyle(color: AppColors.secondaryText, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                if (unlocked.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      'Desbloqueados (${unlocked.length})',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.success),
+                    ),
+                  ),
+                  ...unlocked.map(_buildAchievementTile),
+                  const SizedBox(height: 24),
+                ],
+                if (locked.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      'Bloqueados (${locked.length})',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.secondaryText),
+                    ),
+                  ),
+                  ...locked.map(_buildAchievementTile),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementTile(Achievement achievement) {
+    final unlocked = achievement.unlocked;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.darkCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: unlocked ? AppColors.gold.withValues(alpha: 0.3) : AppColors.border,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: unlocked ? AppColors.gold.withValues(alpha: 0.2) : AppColors.border,
+            ),
+            child: Icon(
+              IconData(achievement.icon.codePoint, fontFamily: achievement.icon.fontFamily),
+              color: unlocked ? AppColors.gold : AppColors.secondaryText,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  achievement.title,
+                  style: TextStyle(
+                    color: unlocked ? AppColors.lightText : AppColors.secondaryText,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  achievement.description,
+                  style: TextStyle(
+                    color: unlocked ? AppColors.secondaryText : AppColors.secondaryText.withValues(alpha: 0.5),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            unlocked ? Icons.check_circle_rounded : Icons.lock_rounded,
+            color: unlocked ? AppColors.success : AppColors.secondaryText,
+            size: 20,
+          ),
+        ],
       ),
     );
   }

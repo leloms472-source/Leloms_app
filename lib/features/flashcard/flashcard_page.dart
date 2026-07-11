@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/flashcard.dart';
 import '../../providers/sanctuary_provider.dart';
+import '../../providers/achievement_provider.dart';
 
 class FlashcardPage extends StatefulWidget {
   final List<Flashcard> flashcards;
@@ -78,6 +79,11 @@ class _FlashcardPageState extends State<FlashcardPage>
 
   void _finishSession() {
     context.read<SanctuaryProvider>().addStudyXp(_learnedCount * 3);
+    final achievements = context.read<AchievementProvider>();
+    achievements.tryUnlock(AchievementId.firstFlashcard);
+    if (_learnedCount >= 50) {
+      achievements.tryUnlock(AchievementId.memoryChampion);
+    }
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
