@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
 
 class CommunityPage extends StatefulWidget {
@@ -123,6 +124,8 @@ class _CommunityPageState extends State<CommunityPage> {
       children: [
         _buildTopContributors(),
         const SizedBox(height: 20),
+        _buildFirestoreLeaderboard(),
+        const SizedBox(height: 20),
         Row(
           children: [
             const Text('Top Resúmenes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
@@ -181,6 +184,77 @@ class _CommunityPageState extends State<CommunityPage> {
       Text(name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
       Text('$votes votos', style: const TextStyle(color: Colors.white70, fontSize: 10)),
     ]);
+  }
+
+  Widget _buildFirestoreLeaderboard() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').orderBy('xp', descending: true).limit(10).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+
+        final users = snapshot.data?.docs ?? [];
+        if (users.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                  child: const Icon(Icons.leaderboard_rounded, color: AppColors.gold, size: 18),
+                ),
+                const SizedBox(width: 8),
+                const Text('Leaderboard', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+              ]),
+              const SizedBox(height: 16),
+              ...users.asMap().entries.map((entry) {
+                final data = entry.value.data() as Map<String, dynamic>? ?? {};
+                final rank = entry.key + 1;
+                final name = data['name'] as String? ?? 'Estudiante';
+                final xp = (data['xp'] as num?)?.toInt() ?? 0;
+                final level = (data['level'] as num?)?.toInt() ?? 1;
+
+                Color rankColor;
+                if (rank == 1) rankColor = AppColors.gold;
+                else if (rank == 2) rankColor = AppColors.secondaryText;
+                else if (rank == 3) rankColor = AppColors.pharmacologyOrange;
+                else rankColor = AppColors.secondaryText;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: rank <= 3 ? rankColor.withValues(alpha: 0.05) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    border: rank <= 3 ? Border.all(color: rankColor.withValues(alpha: 0.2)) : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28, height: 28,
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: rankColor.withValues(alpha: 0.15)),
+                        child: Center(child: Text('$rank', style: TextStyle(color: rankColor, fontSize: 12, fontWeight: FontWeight.bold))),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(name, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600))),
+                      Text('Nv. $level', style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
+                      const SizedBox(width: 8),
+                      Text('$xp XP', style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildRankingItem(Map<String, dynamic> item, int position) {
