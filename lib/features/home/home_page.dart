@@ -370,7 +370,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         const SizedBox(height: 12),
-        ..._todayTasks.map((task) => _buildTaskItem(task)).toList(),
+        ..._todayTasks.map((task) => _buildTaskItem(task)),
       ],
     );
   }

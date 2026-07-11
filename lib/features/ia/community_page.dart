@@ -247,7 +247,7 @@ class _CommunityPageState extends State<CommunityPage> {
           final index = entry.key;
           final item = entry.value;
           return _buildRankingItem(item, index + 1);
-        }).toList(),
+        }),
       ],
     );
   }
@@ -517,7 +517,7 @@ class _CommunityPageState extends State<CommunityPage> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFE2E8F0)),
         ),
         const SizedBox(height: 12),
-        ..._mySummaries.map((item) => _buildMySummaryItem(item)).toList(),
+        ..._mySummaries.map((item) => _buildMySummaryItem(item)),
       ],
     );
   }

@@ -232,7 +232,7 @@ class _LibraryPageState extends State<LibraryPage> {
             ],
           ),
           const SizedBox(height: 12),
-          ..._filteredSubjects.map((subject) => _buildSubjectCard(subject)).toList(),
+          ..._filteredSubjects.map((subject) => _buildSubjectCard(subject)),
           const SizedBox(height: 24),
           _buildResourceTypes(),
         ],

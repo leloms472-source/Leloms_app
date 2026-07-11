@@ -344,7 +344,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ],
         ),
         const SizedBox(height: 12),
-        ..._upcomingEvents.map((event) => _buildUpcomingEventItem(event)).toList(),
+        ..._upcomingEvents.map((event) => _buildUpcomingEventItem(event)),
       ],
     );
   }

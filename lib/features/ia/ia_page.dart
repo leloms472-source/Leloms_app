@@ -95,7 +95,6 @@ class _IaPageState extends State<IaPage> {
               title: Text(level, style: const TextStyle(color: Color(0xFFE2E8F0))),
               value: level,
               groupValue: _selectedDifficulty,
-              activeColor: const Color(0xFF6366F1),
               onChanged: (value) {
                 setState(() => _selectedDifficulty = value!);
                 Navigator.pop(context);
