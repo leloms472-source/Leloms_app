@@ -7,10 +7,14 @@ import 'core/theme/app_typography.dart';
 import 'features/auth/splash_page.dart';
 import 'providers/user_provider.dart';
 import 'providers/sanctuary_provider.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  final notificationService = NotificationService();
+  await notificationService.initialize();
   
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
