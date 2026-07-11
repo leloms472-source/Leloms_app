@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/achievement_provider.dart';
@@ -16,6 +20,64 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
+  String? _avatarPath;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final path = prefs.getString('avatar_path');
+    if (path != null && File(path).existsSync()) {
+      setState(() => _avatarPath = path);
+    }
+  }
+
+  Future<void> _pickAvatar() async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.darkCard,
+        title: const Text('Foto de perfil', style: TextStyle(color: AppColors.lightText)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
+              title: const Text('Cámara', style: TextStyle(color: AppColors.lightText)),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
+              title: const Text('Galería', style: TextStyle(color: AppColors.lightText)),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    try {
+      final xFile = await _picker.pickImage(source: source, maxWidth: 512, maxHeight: 512);
+      if (xFile == null) return;
+
+      final dir = await getApplicationDocumentsDirectory();
+      final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final savedPath = '${dir.path}/$fileName';
+      await File(xFile.path).copy(savedPath);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('avatar_path', savedPath);
+
+      setState(() => _avatarPath = savedPath);
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +126,24 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildHeader(UserProvider user) {
     return Column(children: [
-      Container(
-        width: 100, height: 100,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary, AppColors.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
-          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 5)],
-        ),
-        padding: const EdgeInsets.all(4),
+      GestureDetector(
+        onTap: _pickAvatar,
         child: Container(
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.darkCard),
-          child: const Icon(Icons.person_rounded, size: 50, color: AppColors.lightText),
+          width: 100, height: 100,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary, AppColors.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, spreadRadius: 5)],
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Container(
+            decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.darkCard),
+            child: ClipOval(
+              child: _avatarPath != null
+                  ? Image.file(File(_avatarPath!), fit: BoxFit.cover, width: 92, height: 92)
+                  : const Icon(Icons.person_rounded, size: 50, color: AppColors.lightText),
+            ),
+          ),
         ),
       ),
       const SizedBox(height: 16),
