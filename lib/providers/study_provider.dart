@@ -6,7 +6,7 @@ class StudyProvider extends ChangeNotifier {
   int _allTimeSessions = 0;
   int _allTimeMinutes = 0;
   int _currentStreakDays = 0;
-  List<DateTime> _studyLog = [];
+  final List<DateTime> _studyLog = [];
 
   int get sessionsToday => _sessionsToday;
   int get totalMinutesToday => _totalMinutesToday;

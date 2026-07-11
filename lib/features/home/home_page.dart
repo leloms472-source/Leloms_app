@@ -10,6 +10,7 @@ import '../wellness/wellness_page.dart';
 import '../calendar/calendar_page.dart';
 import '../profile/profile_page.dart';
 import '../sanctuary/sanctuary_page.dart';
+import '../study/study_timer_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -135,6 +136,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          _buildDrawerItem(Icons.timer_rounded, 'Temporizador', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
           _buildDrawerItem(Icons.pets_rounded, 'Santuario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage()))),
           _buildDrawerItem(Icons.school_rounded, 'Biblioteca', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()))),
           _buildDrawerItem(Icons.self_improvement_rounded, 'Bienestar', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WellnessPage()))),
@@ -281,6 +283,14 @@ class _HomePageState extends State<HomePage> {
           subtitle: 'Ranking y resúmenes',
           gradient: const [AppColors.secondary, AppColors.secondaryLight],
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage())),
+        ),
+        const SizedBox(height: 12),
+        _buildBigActionCard(
+          icon: Icons.timer_rounded,
+          title: 'Temporizador',
+          subtitle: 'Pomodoro y sesiones',
+          gradient: const [AppColors.success, AppColors.lime],
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage())),
         ),
       ],
     );

@@ -7,6 +7,7 @@ import 'core/theme/app_typography.dart';
 import 'features/auth/splash_page.dart';
 import 'providers/user_provider.dart';
 import 'providers/sanctuary_provider.dart';
+import 'providers/study_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -34,6 +35,7 @@ class LelomsApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
+        ChangeNotifierProvider(create: (_) => StudyProvider()),
       ],
       child: MaterialApp(
         title: 'LELOMS',
