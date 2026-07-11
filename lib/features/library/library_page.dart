@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
 import '../quiz/quiz_list_page.dart';
 import '../flashcard/flashcard_list_page.dart';
+import '../exam/exam_config_page.dart';
+import '../flashcard/review_queue_page.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -323,6 +325,8 @@ class _LibraryPageState extends State<LibraryPage> {
             _buildResourceType(Icons.quiz_rounded, 'Quizzes', '12', AppColors.physiologyBlue, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizListPage()))),
             _buildResourceType(Icons.account_tree_rounded, 'Mapas', '8', AppColors.biochemistryGreen, null),
             _buildResourceType(Icons.credit_card_rounded, 'Flashcards', '15', AppColors.pharmacologyOrange, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FlashcardListPage()))),
+            _buildResourceType(Icons.assignment_rounded, 'Simulacros', 'Ilimitado', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
+            _buildResourceType(Icons.schedule_rounded, 'Repaso', 'SM-2', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReviewQueuePage()))),
           ],
         ),
       ],
