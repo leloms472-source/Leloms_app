@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/firestore_service.dart';
 import 'flashcard_page.dart';
+import 'review_queue_page.dart';
 
 class FlashcardListPage extends StatelessWidget {
   const FlashcardListPage({super.key});
@@ -16,6 +17,12 @@ class FlashcardListPage extends StatelessWidget {
         title: const Text('Flashcards'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.schedule_rounded),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReviewQueuePage())),
+          ),
+        ],
       ),
       body: StreamBuilder(
         stream: firestore.getFlashcards(),

@@ -28,8 +28,9 @@ class _FlashcardPageState extends State<FlashcardPage>
   late Animation<double> _backRotation;
   int _currentIndex = 0;
   bool _isFlipped = false;
+  bool _isRated = false;
   int _learnedCount = 0;
-  final Set<int> _learnedSet = {};
+
   @override
   void initState() {
     super.initState();
@@ -49,21 +50,17 @@ class _FlashcardPageState extends State<FlashcardPage>
   }
 
   void _toggleFlip() {
-    setState(() => _isFlipped = !_isFlipped);
-    if (_isFlipped) {
-      _flipController.forward();
-    } else {
-      _flipController.reverse();
-    }
+    if (_isFlipped) return;
+    setState(() => _isFlipped = true);
+    _flipController.forward();
   }
 
-  void _markLearned() {
-    if (!_learnedSet.contains(_currentIndex)) {
-      _learnedSet.add(_currentIndex);
-      _learnedCount++;
-      widget.flashcards[_currentIndex].isLearned = true;
-    }
-    _nextCard();
+  void _rateCard(int quality) {
+    final card = widget.flashcards[_currentIndex];
+    Sm2Algorithm.applyReview(card, quality);
+    _learnedCount++;
+    setState(() => _isRated = true);
+    Future.delayed(const Duration(milliseconds: 400), _nextCard);
   }
 
   void _nextCard() {
@@ -84,6 +81,7 @@ class _FlashcardPageState extends State<FlashcardPage>
     if (_learnedCount >= 50) {
       achievements.tryUnlock(AchievementId.memoryChampion);
     }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -98,26 +96,16 @@ class _FlashcardPageState extends State<FlashcardPage>
             ),
             const SizedBox(height: 8),
             Text(
-              '$_learnedCount aprendidas',
-              style: const TextStyle(
-                color: AppColors.success,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              '$_learnedCount revisadas',
+              style: const TextStyle(color: AppColors.success, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Ganaste ${_learnedCount * 3} XP',
-              style: const TextStyle(color: AppColors.primary),
-            ),
+            Text('Ganaste ${_learnedCount * 3} XP', style: const TextStyle(color: AppColors.primary)),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
+            onPressed: () { Navigator.pop(ctx); Navigator.pop(context); },
             child: const Text('Cerrar', style: TextStyle(color: AppColors.primary)),
           ),
         ],
@@ -153,11 +141,7 @@ class _FlashcardPageState extends State<FlashcardPage>
             ),
             child: Text(
               '$_learnedCount ✅',
-              style: const TextStyle(
-                color: AppColors.success,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
           const SizedBox(width: 12),
@@ -181,22 +165,22 @@ class _FlashcardPageState extends State<FlashcardPage>
                 setState(() {
                   _currentIndex = index;
                   _isFlipped = false;
+                  _isRated = false;
                   _flipController.reset();
                 });
               },
               itemCount: widget.flashcards.length,
-              itemBuilder: (context, index) {
-                return _buildFlashcard(widget.flashcards[index], index);
-              },
+              itemBuilder: (context, index) => _buildFlashcard(widget.flashcards[index]),
             ),
           ),
-          _buildControls(),
+          if (_isFlipped && !_isRated) _buildRatingButtons(),
+          if (!_isFlipped) _buildHint(),
         ],
       ),
     );
   }
 
-  Widget _buildFlashcard(Flashcard card, int index) {
+  Widget _buildFlashcard(Flashcard card) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: GestureDetector(
@@ -248,24 +232,14 @@ class _FlashcardPageState extends State<FlashcardPage>
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                color.withValues(alpha: 0.15),
-                color.withValues(alpha: 0.05),
-              ],
+              colors: [color.withValues(alpha: 0.15), color.withValues(alpha: 0.05)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: color.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
             boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.1),
-                blurRadius: 20,
-                spreadRadius: 2,
-              ),
+              BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 20, spreadRadius: 2),
             ],
           ),
           child: Column(
@@ -277,33 +251,13 @@ class _FlashcardPageState extends State<FlashcardPage>
                   color: color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 24),
               Text(
                 text,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.lightText,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                'Toca para voltear',
-                style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: AppColors.lightText, fontSize: 18, fontWeight: FontWeight.w600, height: 1.5),
               ),
             ],
           ),
@@ -312,40 +266,28 @@ class _FlashcardPageState extends State<FlashcardPage>
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildRatingButtons() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, -2))],
       ),
       child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _buildControlButton(
-              icon: Icons.refresh_rounded,
-              label: 'Repetir',
-              color: AppColors.pharmacologyOrange,
-              onTap: _nextCard,
-            ),
-            _buildControlButton(
-              icon: Icons.visibility_rounded,
-              label: _isFlipped ? 'Ocultar' : 'Ver',
-              color: AppColors.primary,
-              onTap: _toggleFlip,
-            ),
-            _buildControlButton(
-              icon: Icons.check_circle_rounded,
-              label: 'Aprendida',
-              color: AppColors.success,
-              onTap: _markLearned,
+            const Text('¿Qué tan bien lo recordabas?', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildRatingButton(1, 'Muy mal', AppColors.error),
+                _buildRatingButton(2, 'Difícil', AppColors.pharmacologyOrange),
+                _buildRatingButton(3, 'Regular', AppColors.warning),
+                _buildRatingButton(4, 'Bien', AppColors.info),
+                _buildRatingButton(5, 'Perfecto', AppColors.success),
+              ],
             ),
           ],
         ),
@@ -353,40 +295,37 @@ class _FlashcardPageState extends State<FlashcardPage>
     );
   }
 
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildRatingButton(int quality, String label, Color color) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _rateCard(quality),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: color.withValues(alpha: 0.15),
-              border: Border.all(
-                color: color.withValues(alpha: 0.4),
-                width: 1.5,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.4), width: 1.5),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: AppColors.lightText.withValues(alpha: 0.7),
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
+            child: Center(
+              child: Text('$quality', style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)),
             ),
           ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: AppColors.lightText.withValues(alpha: 0.7), fontSize: 9)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHint() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        'Toca la tarjeta para ver la respuesta',
+        style: TextStyle(color: AppColors.secondaryText.withValues(alpha: 0.6), fontSize: 13),
       ),
     );
   }
