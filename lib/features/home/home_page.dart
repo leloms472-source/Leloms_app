@@ -16,6 +16,7 @@ import '../study/study_timer_page.dart';
 import '../analytics/analytics_page.dart';
 import '../exam/exam_config_page.dart';
 import '../search/global_search_page.dart';
+import '../study_plan/study_plan_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -99,6 +100,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          _buildDrawerItem(Icons.checklist_rounded, 'Plan de Estudio', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyPlanPage()))),
           _buildDrawerItem(Icons.assignment_rounded, 'Simulacros', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
           _buildDrawerItem(Icons.show_chart_rounded, 'Progreso', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalyticsPage()))),
           _buildDrawerItem(Icons.timer_rounded, 'Temporizador', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
