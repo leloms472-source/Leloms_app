@@ -19,6 +19,13 @@ class QuizQuestion {
       explanation: map['explanation'] as String?,
     );
   }
+
+  Map<String, dynamic> toMap() => {
+        'question': question,
+        'options': options,
+        'correctIndex': correctIndex,
+        'explanation': explanation,
+      };
 }
 
 class Quiz {
@@ -51,4 +58,12 @@ class Quiz {
       timeMinutes: (map['timeMinutes'] as num?)?.toInt() ?? 10,
     );
   }
+
+  Map<String, dynamic> toMap() => {
+        'title': title,
+        'subject': subject,
+        'difficulty': difficulty,
+        'questions': questions.map((q) => q.toMap()).toList(),
+        'timeMinutes': timeMinutes,
+      };
 }

@@ -9,6 +9,7 @@ import '../../providers/user_provider.dart';
 import '../../providers/achievement_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../sanctuary/sanctuary_page.dart';
+import '../admin/admin_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -109,6 +110,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildAchievements(),
                 const SizedBox(height: 24),
                 _buildSanctuaryPlaceholder(),
+                const SizedBox(height: 24),
+                _buildAdminPanel(),
                 const SizedBox(height: 24),
                 _buildSettings(),
                 const SizedBox(height: 24),
@@ -373,6 +376,28 @@ class _ProfilePageState extends State<ProfilePage> {
           onChanged: (_) => context.read<ThemeProvider>().toggle(),
         ),
       ]),
+    );
+  }
+
+  Widget _buildAdminPanel() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.darkCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.3)),
+      ),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: AppColors.purple.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+          child: const Icon(Icons.admin_panel_settings_rounded, color: AppColors.purple, size: 20),
+        ),
+        title: const Text('Panel Admin', style: TextStyle(color: AppColors.lightText, fontWeight: FontWeight.bold)),
+        subtitle: const Text('Gestionar contenido educativo', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPage())),
+      ),
     );
   }
 
