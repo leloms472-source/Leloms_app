@@ -139,6 +139,7 @@ class _AchievementListenerState extends State<_AchievementListener> {
   int _lastXpCheck = 0;
   int _lastStreakCheck = 0;
   TreeStage _lastTreeStageCheck = TreeStage.seed;
+  String? _lastUnlockedId;
 
   @override
   void didChangeDependencies() {
@@ -148,11 +149,36 @@ class _AchievementListenerState extends State<_AchievementListener> {
     _lastStreakCheck = user.streak;
   }
 
+  void _onAchievementUnlocked(AchievementProvider achievements) {
+    final last = achievements.lastUnlocked;
+    if (last != null && last.id.name != _lastUnlockedId) {
+      _lastUnlockedId = last.id.name;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(children: [
+              const Icon(Icons.emoji_events_rounded, color: AppColors.gold),
+              const SizedBox(width: 12),
+              Expanded(child: Text('${last.title}: ${last.description}', style: const TextStyle(color: Colors.white))),
+            ]),
+            backgroundColor: AppColors.darkCard,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>();
     final sanctuary = context.watch<SanctuaryProvider>();
     final achievements = context.read<AchievementProvider>();
+
+    _onAchievementUnlocked(achievements);
 
     if (user.currentXp != _lastXpCheck) {
       _lastXpCheck = user.currentXp;
