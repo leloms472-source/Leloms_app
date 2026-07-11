@@ -11,6 +11,7 @@ import 'providers/study_provider.dart';
 import 'providers/achievement_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/challenge_provider.dart';
+import 'providers/shop_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -49,6 +50,11 @@ class LelomsApp extends StatelessWidget {
           final cp = ChallengeProvider();
           cp.initialize();
           return cp;
+        }),
+        ChangeNotifierProvider<ShopProvider>(create: (_) {
+          final sp = ShopProvider();
+          sp.initialize();
+          return sp;
         }),
       ],
       child: _AchievementListener(

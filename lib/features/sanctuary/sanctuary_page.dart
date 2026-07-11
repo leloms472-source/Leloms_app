@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/sanctuary_provider.dart';
+import '../../providers/shop_provider.dart';
+import '../shop/shop_page.dart';
 
 class SanctuaryPage extends StatefulWidget {
   const SanctuaryPage({super.key});
@@ -67,6 +69,18 @@ class _SanctuaryPageState extends State<SanctuaryPage>
         title: const Text('Mi Santuario'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Consumer<ShopProvider>(
+              builder: (context, shop, _) => IconButton(
+                icon: const Icon(Icons.shopping_bag_rounded, color: AppColors.gold),
+                tooltip: 'Tienda',
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopPage())),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

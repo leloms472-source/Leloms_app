@@ -13,6 +13,7 @@ import '../wellness/wellness_page.dart';
 import '../calendar/calendar_page.dart';
 import '../profile/profile_page.dart';
 import '../sanctuary/sanctuary_page.dart';
+import '../shop/shop_page.dart';
 import '../study/study_timer_page.dart';
 import '../analytics/analytics_page.dart';
 import '../exam/exam_config_page.dart';
@@ -108,6 +109,7 @@ class _HomePageState extends State<HomePage> {
           _buildDrawerItem(Icons.show_chart_rounded, 'Progreso', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalyticsPage()))),
           _buildDrawerItem(Icons.timer_rounded, 'Temporizador', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
           _buildDrawerItem(Icons.pets_rounded, 'Santuario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage()))),
+          _buildDrawerItem(Icons.shopping_bag_rounded, 'Tienda', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopPage()))),
           _buildDrawerItem(Icons.school_rounded, 'Biblioteca', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()))),
           _buildDrawerItem(Icons.self_improvement_rounded, 'Bienestar', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WellnessPage()))),
           _buildDrawerItem(Icons.calendar_month_rounded, 'Calendario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()))),
@@ -256,6 +258,14 @@ class _HomePageState extends State<HomePage> {
             Expanded(child: _buildQuickCard(Icons.timer_rounded, 'Pomodoro', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage())))),
             const SizedBox(width: 8),
             Expanded(child: _buildQuickCard(Icons.groups_rounded, 'Comunidad', AppColors.secondary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage())))),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(child: _buildQuickCard(Icons.shopping_bag_rounded, 'Tienda', AppColors.gold, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopPage())))),
+            const SizedBox(width: 8),
+            Expanded(child: _buildQuickCard(Icons.pets_rounded, 'Santuario', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage())))),
           ],
         ),
       ],
