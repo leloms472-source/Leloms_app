@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/quiz.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/achievement_provider.dart';
+import '../../providers/challenge_provider.dart';
 
 class QuizPage extends StatefulWidget {
   final Quiz quiz;
@@ -84,6 +85,7 @@ class _QuizPageState extends State<QuizPage> {
     if (_correctCount >= widget.quiz.questions.length * 0.8) {
       achievements.tryUnlock(AchievementId.quizMaster);
     }
+    context.read<ChallengeProvider>().addProgress(ChallengeType.quizQuestions, widget.quiz.questions.length);
     setState(() => _isFinished = true);
   }
 

@@ -10,6 +10,7 @@ import 'providers/sanctuary_provider.dart' show SanctuaryProvider, TreeStage;
 import 'providers/study_provider.dart';
 import 'providers/achievement_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/challenge_provider.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -44,6 +45,11 @@ class LelomsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
         ChangeNotifierProvider(create: (_) => StudyProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
+        ChangeNotifierProvider<ChallengeProvider>(create: (_) {
+          final cp = ChallengeProvider();
+          cp.initialize();
+          return cp;
+        }),
       ],
       child: _AchievementListener(
         child: Consumer<ThemeProvider>(

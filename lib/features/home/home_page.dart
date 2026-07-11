@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/study_provider.dart';
 import '../../providers/sanctuary_provider.dart';
+import '../../providers/challenge_provider.dart';
 import '../ia/ia_page.dart';
 import '../ia/community_page.dart';
 import '../library/library_page.dart';
@@ -56,6 +57,8 @@ class _HomePageState extends State<HomePage> {
             _buildLiveStats(user, sanctuary),
             const SizedBox(height: 24),
             _buildQuickActions(context),
+            const SizedBox(height: 24),
+            _buildDailyChallenges(),
             const SizedBox(height: 24),
             _buildDueReviews(),
             const SizedBox(height: 24),
@@ -363,6 +366,104 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDailyChallenges() {
+    final challenges = context.watch<ChallengeProvider>();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.darkCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: challenges.allCompleted
+              ? AppColors.success.withValues(alpha: 0.3)
+              : AppColors.primary.withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.gold.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.emoji_events_rounded, color: AppColors.gold, size: 18),
+              ),
+              const SizedBox(width: 10),
+              const Text('Desafíos Diarios', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+              const Spacer(),
+              Text('${challenges.completedCount}/${challenges.totalCount}', style: TextStyle(color: challenges.allCompleted ? AppColors.success : AppColors.secondaryText, fontSize: 13, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ...challenges.challenges.map((c) => Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: c.isCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: c.isCompleted ? AppColors.success.withValues(alpha: 0.2) : AppColors.border.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  c.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                  color: c.isCompleted ? AppColors.success : AppColors.secondaryText,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(c.title, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600)),
+                      Text(c.description, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('+${c.xpReward} XP', style: TextStyle(color: c.isCompleted ? AppColors.success : AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          )),
+          if (challenges.canClaim)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final xp = challenges.claimAllRewards();
+                    if (xp > 0 && context.mounted) {
+                      context.read<UserProvider>().addXp(xp);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('¡Ganaste $xp XP extra por los desafíos!'),
+                          backgroundColor: AppColors.success,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.workspace_premium_rounded, size: 18),
+                  label: Text('Reclamar ${challenges.challenges.fold(0, (s, c) => s + c.xpReward)} XP'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.gold,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

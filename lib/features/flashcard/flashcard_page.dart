@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/flashcard.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/achievement_provider.dart';
+import '../../providers/challenge_provider.dart';
 
 class FlashcardPage extends StatefulWidget {
   final List<Flashcard> flashcards;
@@ -84,6 +85,7 @@ class _FlashcardPageState extends State<FlashcardPage>
     if (_learnedCount >= 50) {
       achievements.tryUnlock(AchievementId.memoryChampion);
     }
+    context.read<ChallengeProvider>().addProgress(ChallengeType.flashcards, _learnedCount);
 
     showDialog(
       context: context,
