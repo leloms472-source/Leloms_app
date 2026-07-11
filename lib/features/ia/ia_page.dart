@@ -1,6 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/ai_service.dart';
 
 class IaPage extends StatefulWidget {
   const IaPage({super.key});
@@ -10,11 +10,14 @@ class IaPage extends StatefulWidget {
 }
 
 class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
+  final AiService _aiService = AiService();
   final List<Map<String, dynamic>> _messages = [];
+  final List<Map<String, String>> _conversationHistory = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
   String _selectedDifficulty = 'Intermedio';
+  bool _apiConfigured = false;
 
   final List<String> _quickActions = [
     'Resumir PDF',
@@ -50,7 +53,7 @@ class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
     return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   }
 
-  void _sendMessage(String text) {
+  void _sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
     setState(() {
@@ -65,18 +68,21 @@ class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
     _textController.clear();
     _scrollToBottom();
 
-    Future.delayed(const Duration(seconds: 1) + Duration(milliseconds: Random().nextInt(2000)), () {
-      if (!mounted) return;
-      setState(() {
-        _isTyping = false;
-        _messages.add({
-          'type': 'ai',
-          'content': _generateResponse(text),
-          'time': _getCurrentTime(),
-        });
+    _conversationHistory.add({'role': 'user', 'content': text});
+
+    final response = await _aiService.sendMessage(messages: _conversationHistory);
+
+    if (!mounted) return;
+    setState(() {
+      _isTyping = false;
+      _conversationHistory.add({'role': 'assistant', 'content': response});
+      _messages.add({
+        'type': 'ai',
+        'content': response,
+        'time': _getCurrentTime(),
       });
-      _scrollToBottom();
     });
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -91,18 +97,72 @@ class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
     });
   }
 
-  String _generateResponse(String userMessage) {
-    final lower = userMessage.toLowerCase();
-
-    if (lower.contains('resumir') || lower.contains('pdf')) {
-      return '📄 Perfecto, sube tu PDF y generaré un resumen completo.\n\n**Modo disponible:**\n• Resumen detallado\n• Explicación simple\n\n¿Cuál prefieres?';
-    } else if (lower.contains('quiz') || lower.contains('preguntas')) {
-      return '📝 ¡Excelente! Puedo crear un quiz de 20 preguntas sobre cualquier tema.\n\n**Nivel de dificultad:**\n• Básico\n• Intermedio\n• Avanzado\n\n¿Sobre qué tema quieres el quiz?';
-    } else if (lower.contains('flashcard')) {
-      return '🃏 Las flashcards son perfectas para memorizar.\n\nGeneraré tarjetas con:\n• Pregunta al frente\n• Respuesta al reverso\n• Conceptos clave del tema\n\n¿De qué materia necesitas flashcards?';
-    } else {
-      return 'Entiendo tu pregunta. Para darte la mejor respuesta, ¿podrías ser más específico?\n\nPor ejemplo:\n• "Resumir el PDF de Anatomía"\n• "Crear quiz de Farmacología"\n• "Explicar simple el sistema cardiovascular"';
-    }
+  void _showApiConfigDialog() {
+    final keyController = TextEditingController(text: _aiService.isConfigured ? '' : '');
+    final urlController = TextEditingController(text: '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.darkCard,
+        title: const Text('Configurar API', style: TextStyle(color: AppColors.lightText)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Conecta tu propio endpoint de OpenAI compatible.\nPuedes usar OpenAI, Azure, Groq, Together, etc.',
+              style: TextStyle(color: AppColors.secondaryText, fontSize: 12),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: urlController,
+              style: const TextStyle(color: AppColors.lightText, fontSize: 13),
+              decoration: InputDecoration(
+                labelText: 'URL Base (opcional)',
+                hintText: 'https://api.openai.com/v1',
+                hintStyle: const TextStyle(color: AppColors.secondaryText),
+                labelStyle: const TextStyle(color: AppColors.secondaryText),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: keyController,
+              obscureText: true,
+              style: const TextStyle(color: AppColors.lightText, fontSize: 13),
+              decoration: InputDecoration(
+                labelText: 'API Key',
+                hintText: 'sk-...',
+                hintStyle: const TextStyle(color: AppColors.secondaryText),
+                labelStyle: const TextStyle(color: AppColors.secondaryText),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.primary)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.secondaryText)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _aiService.configure(
+                baseUrl: urlController.text.isNotEmpty ? urlController.text : null,
+                apiKey: keyController.text.isNotEmpty ? keyController.text : null,
+              );
+              setState(() => _apiConfigured = _aiService.isConfigured);
+              Navigator.pop(ctx);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Conectar'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showDifficultyDialog() {
@@ -185,7 +245,13 @@ class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.history_rounded), onPressed: () {}),
+          IconButton(
+            icon: Icon(
+              Icons.settings_rounded,
+              color: _apiConfigured ? AppColors.success : AppColors.secondaryText,
+            ),
+            onPressed: _showApiConfigDialog,
+          ),
           IconButton(icon: const Icon(Icons.tune_rounded), onPressed: _showDifficultyDialog),
         ],
       ),
