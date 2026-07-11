@@ -55,6 +55,13 @@ abstract class AppColors {
   // Para histología
   static const Color histologyPurple = Color(0xFF8B5CF6);
 
+  // Light theme
+  static const Color lightBg = Color(0xFFF8FAFC);
+  static const Color lightCard = Color(0xFFFFFFFF);
+  static const Color lightTextPrimary = Color(0xFF1E293B);
+  static const Color lightTextSecondary = Color(0xFF64748B);
+  static const Color lightBorder = Color(0xFFE2E8F0);
+
   // Overlay
   static const Color overlay = Color(0xFF000000);
   static const Color overlayLight = Color(0xFFFFFFFF);

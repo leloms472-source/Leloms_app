@@ -57,7 +57,7 @@ class LelomsApp extends StatelessWidget {
             return MaterialApp(
               title: 'LELOMS',
               debugShowCheckedModeBanner: false,
-              theme: _buildDarkTheme(),
+              theme: _buildLightTheme(),
               darkTheme: _buildDarkTheme(),
               themeMode: theme.themeMode,
               home: const SplashPage(),
@@ -131,6 +131,70 @@ class LelomsApp extends StatelessWidget {
       ),
     );
   }
+}
+
+ThemeData _buildLightTheme() {
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    primaryColor: AppColors.primary,
+    scaffoldBackgroundColor: AppColors.lightBg,
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.primary,
+      secondary: AppColors.secondary,
+      tertiary: AppColors.tertiary,
+      surface: AppColors.lightCard,
+      error: AppColors.error,
+    ),
+    fontFamily: 'Roboto',
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.lightBg,
+      elevation: 0,
+      centerTitle: false,
+      titleTextStyle: AppTypography.titleLarge,
+      iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.lightCard,
+      elevation: 2,
+      shadowColor: AppColors.overlay.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        side: const BorderSide(color: AppColors.primary),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.lightCard,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.lightBorder),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: AppColors.lightCard,
+      indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+      labelTextStyle: WidgetStateProperty.all(AppTypography.labelMedium),
+    ),
+  );
 }
 
 class _AchievementListener extends StatefulWidget {
