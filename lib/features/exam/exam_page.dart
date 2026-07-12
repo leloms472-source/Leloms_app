@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/exam.dart';
@@ -424,9 +423,9 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
 
   Widget _buildScoreCircle(int pct, int correct) {
     Color color;
-    if (pct >= 80) color = AppColors.success;
-    else if (pct >= 60) color = AppColors.warning;
-    else color = AppColors.error;
+    if (pct >= 80) { color = AppColors.success; }
+    else if (pct >= 60) { color = AppColors.warning; }
+    else { color = AppColors.error; }
 
     return Container(
       width: 160, height: 160,

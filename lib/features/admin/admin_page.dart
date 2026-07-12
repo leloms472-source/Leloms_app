@@ -217,6 +217,7 @@ class AdminPage extends StatelessWidget {
                 'completed': 0,
               });
               if (ctx.mounted) Navigator.pop(ctx);
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Asignatura "${nameCtrl.text.trim()}" creada'), backgroundColor: AppColors.success),
               );

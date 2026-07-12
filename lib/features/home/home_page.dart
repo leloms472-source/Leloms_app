@@ -133,9 +133,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildHeader(UserProvider user) {
     final hour = DateTime.now().hour;
     String greeting;
-    if (hour < 12) greeting = 'Buenos días';
-    else if (hour < 18) greeting = 'Buenas tardes';
-    else greeting = 'Buenas noches';
+    if (hour < 12) { greeting = 'Buenos días'; }
+    else if (hour < 18) { greeting = 'Buenas tardes'; }
+    else { greeting = 'Buenas noches'; }
 
     return Row(
       children: [
@@ -521,8 +521,8 @@ class _HomePageState extends State<HomePage> {
       selectedIndex: _selectedIndex,
       onDestinationSelected: (index) {
         setState(() => _selectedIndex = index);
-        if (index == 1) Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()));
-        else if (index == 2) Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()));
+        if (index == 1) { Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage())); }
+        else if (index == 2) { Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage())); }
       },
       destinations: const [
         NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Inicio'),

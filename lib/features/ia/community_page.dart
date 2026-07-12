@@ -221,10 +221,10 @@ class _CommunityPageState extends State<CommunityPage> {
                 final level = (data['level'] as num?)?.toInt() ?? 1;
 
                 Color rankColor;
-                if (rank == 1) rankColor = AppColors.gold;
-                else if (rank == 2) rankColor = AppColors.secondaryText;
-                else if (rank == 3) rankColor = AppColors.pharmacologyOrange;
-                else rankColor = AppColors.secondaryText;
+                if (rank == 1) { rankColor = AppColors.gold; }
+                else if (rank == 2) { rankColor = AppColors.secondaryText; }
+                else if (rank == 3) { rankColor = AppColors.pharmacologyOrange; }
+                else { rankColor = AppColors.secondaryText; }
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),

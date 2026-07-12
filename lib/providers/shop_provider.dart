@@ -1,5 +1,3 @@
-import 'dart:ui';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,7 +34,7 @@ class ShopItem {
 }
 
 class ShopProvider extends ChangeNotifier {
-  List<ShopItem> _items = _allItems();
+  final List<ShopItem> _items = _allItems();
   int _activeXpBoostSessions = 0;
   int _streakFreezesUsed = 0;
   String? _activeCatCosmetic;

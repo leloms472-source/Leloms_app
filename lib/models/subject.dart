@@ -36,6 +36,6 @@ class Subject {
         'progress': progress,
         'resources': resources,
         'completed': completed,
-        'color': color.value,
+        'color': color.toARGB32(),
       };
 }

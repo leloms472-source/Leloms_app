@@ -173,24 +173,26 @@ class _IaPageState extends State<IaPage> with TickerProviderStateMixin {
         title: const Text('Selecciona dificultad', style: TextStyle(color: AppColors.lightText)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: ['Básico', 'Intermedio', 'Avanzado'].map((level) {
-            final isSelected = _selectedDifficulty == level;
-            return ListTile(
-              leading: Radio<String>(
-                value: level,
-                groupValue: _selectedDifficulty,
-                onChanged: (value) {
-                  setState(() => _selectedDifficulty = value!);
-                  Navigator.pop(context);
-                },
-              ),
-              title: Text(level, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.lightText)),
-              onTap: () {
-                setState(() => _selectedDifficulty = level);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+              children: ['Básico', 'Intermedio', 'Avanzado'].map((level) {
+                final isSelected = _selectedDifficulty == level;
+                return ListTile(
+                  leading: Radio<String>(
+                    value: level,
+                    // ignore: deprecated_member_use
+                    groupValue: _selectedDifficulty,
+                    // ignore: deprecated_member_use
+                    onChanged: (_) {
+                      setState(() => _selectedDifficulty = level);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  title: Text(level, style: TextStyle(color: isSelected ? AppColors.primary : AppColors.lightText)),
+                  onTap: () {
+                    setState(() => _selectedDifficulty = level);
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
         ),
       ),
     );

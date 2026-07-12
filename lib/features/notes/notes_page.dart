@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/secure_storage_service.dart';
 
 class NotesPage extends StatefulWidget {
   final String subject;
@@ -13,6 +12,7 @@ class NotesPage extends StatefulWidget {
 
 class _NotesPageState extends State<NotesPage> {
   final TextEditingController _controller = TextEditingController();
+  final SecureStorageService _secureStorage = SecureStorageService();
   String _savedNote = '';
   bool _isEditing = false;
   DateTime? _lastEdited;
@@ -24,39 +24,26 @@ class _NotesPageState extends State<NotesPage> {
   }
 
   Future<void> _loadNote() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'note_${widget.subject}';
-    final stored = prefs.getString(key);
+    final stored = await _secureStorage.readNote(widget.subject);
     if (stored != null) {
-      try {
-        final data = jsonDecode(stored) as Map<String, dynamic>;
-        _savedNote = data['content'] as String? ?? '';
-        final edited = data['lastEdited'] as String?;
-        if (edited != null) _lastEdited = DateTime.parse(edited);
-        _controller.text = _savedNote;
-      } catch (_) {
-        _savedNote = '';
-      }
+      _savedNote = stored;
+      _controller.text = _savedNote;
     }
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _saveNote() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'note_${widget.subject}';
-    final data = jsonEncode({
-      'content': _controller.text,
-      'lastEdited': DateTime.now().toIso8601String(),
-    });
-    await prefs.setString(key, data);
+    await _secureStorage.saveNote(widget.subject, _controller.text);
     setState(() {
       _savedNote = _controller.text;
       _isEditing = false;
       _lastEdited = DateTime.now();
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Nota guardada'), duration: Duration(seconds: 1)),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nota guardada'), duration: Duration(seconds: 1)),
+      );
+    }
   }
 
   @override

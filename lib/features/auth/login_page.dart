@@ -142,12 +142,13 @@ class _LoginPageState extends State<LoginPage>
       setState(() => _errorMessage = 'Completa todos los campos');
       return false;
     }
-    if (!_emailController.text.contains('@')) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(_emailController.text.trim())) {
       setState(() => _errorMessage = 'Correo electrónico inválido');
       return false;
     }
-    if (_passwordController.text.length < 6) {
-      setState(() => _errorMessage = 'La contraseña debe tener al menos 6 caracteres');
+    if (_passwordController.text.length < 8) {
+      setState(() => _errorMessage = 'La contraseña debe tener al menos 8 caracteres');
       return false;
     }
     if (_isRegistering && _nameController.text.trim().isEmpty) {
@@ -522,7 +523,7 @@ class _LoginPageState extends State<LoginPage>
           obscureText: _obscurePassword,
           style: const TextStyle(color: AppColors.lightText),
           decoration: InputDecoration(
-            hintText: 'Mínimo 6 caracteres',
+            hintText: 'Mínimo 8 caracteres',
             prefixIcon:
                 const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
             suffixIcon: IconButton(

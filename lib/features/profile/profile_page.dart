@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/achievement_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/secure_storage_service.dart';
 import '../sanctuary/sanctuary_page.dart';
 import '../admin/admin_page.dart';
 
@@ -19,6 +19,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final SecureStorageService _secureStorage = SecureStorageService();
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   String? _avatarPath;
@@ -31,10 +32,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadAvatar() async {
-    final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString('avatar_path');
+    final path = await _secureStorage.readAvatarPath();
     if (path != null && File(path).existsSync()) {
-      setState(() => _avatarPath = path);
+      if (mounted) setState(() => _avatarPath = path);
     }
   }
 
@@ -73,10 +73,9 @@ class _ProfilePageState extends State<ProfilePage> {
       final savedPath = '${dir.path}/$fileName';
       await File(xFile.path).copy(savedPath);
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('avatar_path', savedPath);
+      await _secureStorage.saveAvatarPath(savedPath);
 
-      setState(() => _avatarPath = savedPath);
+      if (mounted) setState(() => _avatarPath = savedPath);
     } catch (_) {}
   }
 

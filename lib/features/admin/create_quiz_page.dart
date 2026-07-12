@@ -26,7 +26,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   void dispose() {
     _titleCtrl.dispose();
     _timeCtrl.dispose();
-    for (final q in _questions) q.dispose();
+    for (final q in _questions) { q.dispose(); }
     super.dispose();
   }
 
@@ -131,7 +131,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _selectedSubject,
+                  initialValue: _selectedSubject,
                   dropdownColor: AppColors.darkCard,
                   style: const TextStyle(color: AppColors.lightText),
                   decoration: const InputDecoration(labelText: 'Asignatura', labelStyle: TextStyle(color: AppColors.secondaryText)),
@@ -140,7 +140,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _selectedDifficulty,
+                  initialValue: _selectedDifficulty,
                   dropdownColor: AppColors.darkCard,
                   style: const TextStyle(color: AppColors.lightText),
                   decoration: const InputDecoration(labelText: 'Dificultad', labelStyle: TextStyle(color: AppColors.secondaryText)),

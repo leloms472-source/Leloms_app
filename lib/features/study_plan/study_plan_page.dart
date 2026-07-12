@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/study_plan.dart';
+import '../../services/secure_storage_service.dart';
 
 class StudyPlanPage extends StatefulWidget {
   const StudyPlanPage({super.key});
@@ -12,6 +12,7 @@ class StudyPlanPage extends StatefulWidget {
 }
 
 class _StudyPlanPageState extends State<StudyPlanPage> {
+  final SecureStorageService _secureStorage = SecureStorageService();
   StudyPlan? _plan;
   bool _showGenerator = false;
 
@@ -30,8 +31,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
   }
 
   Future<void> _loadPlan() async {
-    final prefs = await SharedPreferences.getInstance();
-    final stored = prefs.getString('study_plan');
+    final stored = await _secureStorage.readStudyPlan();
     if (stored != null) {
       try {
         final data = jsonDecode(stored) as Map<String, dynamic>;
@@ -42,18 +42,18 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
   }
 
   Future<void> _savePlan(StudyPlan plan) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('study_plan', jsonEncode(plan.toMap()));
-    setState(() {
-      _plan = plan;
-      _showGenerator = false;
-    });
+    await _secureStorage.saveStudyPlan(jsonEncode(plan.toMap()));
+    if (mounted) {
+      setState(() {
+        _plan = plan;
+        _showGenerator = false;
+      });
+    }
   }
 
   Future<void> _deletePlan() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('study_plan');
-    setState(() => _plan = null);
+    await _secureStorage.deleteStudyPlan();
+    if (mounted) setState(() => _plan = null);
   }
 
   void _generatePlan() {
@@ -218,8 +218,8 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
               final selected = _selectedSubjects.contains(subject);
               return GestureDetector(
                 onTap: () => setState(() {
-                  if (selected) _selectedSubjects.remove(subject);
-                  else _selectedSubjects.add(subject);
+                  if (selected) { _selectedSubjects.remove(subject); }
+                  else { _selectedSubjects.add(subject); }
                 }),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

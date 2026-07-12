@@ -156,7 +156,7 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedSubject,
+            initialValue: _selectedSubject,
             dropdownColor: AppColors.darkCard,
             style: const TextStyle(color: AppColors.lightText),
             decoration: const InputDecoration(
