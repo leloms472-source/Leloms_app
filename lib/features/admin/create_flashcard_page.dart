@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/repositories/content_repository.dart';
+import '../../core/repositories/auth_repository.dart';
 import '../../core/models/flashcard_model.dart';
-import '../../providers/user_provider.dart';
 
 class CreateFlashcardPage extends StatefulWidget {
   const CreateFlashcardPage({super.key});
@@ -40,10 +40,10 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
     setState(() => _saving = true);
 
     try {
-      final user = context.read<UserProvider>();
+      final userId = AuthRepository().currentUser?.id;
       final flashcard = FlashcardModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: user.isLoggedIn ? null : null,
+        userId: userId,
         front: _frontCtrl.text.trim(),
         back: _backCtrl.text.trim(),
         subject: _selectedSubject,

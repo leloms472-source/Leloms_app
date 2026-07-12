@@ -41,12 +41,12 @@ class UserProvider extends ChangeNotifier {
 
   void addXp(int amount) {
     if (_profile == null) return;
-    final newXp = _profile!.currentXp + amount;
-    int newLevel = _profile!.level;
-    int newNextLevel = _profile!.nextLevelXp;
+    var newXp = _profile!.currentXp + amount;
+    var newLevel = _profile!.level;
+    var newNextLevel = _profile!.nextLevelXp;
 
     while (newXp >= newNextLevel) {
-      newXp - newNextLevel;
+      newXp -= newNextLevel;
       newLevel++;
       newNextLevel = _calculateXpForLevel(newLevel);
     }

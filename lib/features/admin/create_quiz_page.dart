@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/repositories/content_repository.dart';
+import '../../core/repositories/auth_repository.dart';
 import '../../core/models/quiz_model.dart';
 
 class CreateQuizPage extends StatefulWidget {
@@ -70,6 +71,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
     try {
       final quiz = QuizModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: AuthRepository().currentUser?.id,
         title: _titleCtrl.text.trim(),
         subject: _selectedSubject,
         difficulty: _selectedDifficulty,
