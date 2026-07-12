@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/repositories/shop_repository.dart';
 
 enum ShopItemId {
   streakFreeze,
@@ -34,11 +35,13 @@ class ShopItem {
 }
 
 class ShopProvider extends ChangeNotifier {
+  late final ShopRepository _repo;
   final List<ShopItem> _items = _allItems();
   int _activeXpBoostSessions = 0;
   int _streakFreezesUsed = 0;
   String? _activeCatCosmetic;
   String? _activeSanctuaryCosmetic;
+  String? _userId;
 
   List<ShopItem> get items => List.unmodifiable(_items);
   int get activeXpBoostSessions => _activeXpBoostSessions;
@@ -52,6 +55,59 @@ class ShopProvider extends ChangeNotifier {
   static const _keyFreezesUsed = 'shop_freezes';
   static const _keyCatCosmetic = 'shop_cat_cosmetic';
   static const _keySanctuaryCosmetic = 'shop_sanctuary_cosmetic';
+
+  ShopProvider() {
+    _repo = ShopRepository();
+  }
+
+  Future<void> loadFromServer(String userId) async {
+    _userId = userId;
+    try {
+      final inventory = await _repo.getInventory(userId);
+      for (final entry in inventory) {
+        final itemId = entry['item_id'] as String;
+        final quantity = (entry['quantity'] as num?)?.toInt() ?? 1;
+        try {
+          final id = ShopItemId.values.firstWhere((e) => e.name == itemId);
+          final item = _items.firstWhere((i) => i.id == id);
+          item.owned = quantity;
+        } catch (_) {}
+      }
+
+      final xpBoost = await _repo.getXpBoost(userId);
+      if (xpBoost != null) {
+        _activeXpBoostSessions = (xpBoost['remaining_sessions'] as num?)?.toInt() ?? 0;
+      }
+
+      final cosmetics = await _repo.getCosmetics(userId);
+      if (cosmetics != null) {
+        _activeCatCosmetic = cosmetics['active_cat_cosmetic'] as String?;
+        _activeSanctuaryCosmetic = cosmetics['active_sanctuary_cosmetic'] as String?;
+      }
+
+      notifyListeners();
+    } catch (_) {
+      await _loadFromPrefs();
+    }
+  }
+
+  Future<void> _loadFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final inv = prefs.getStringList(_keyInventory) ?? [];
+    for (final entry in inv) {
+      final parts = entry.split(':');
+      final id = ShopItemId.values.firstWhere(
+        (e) => e.name == parts[0],
+        orElse: () => ShopItemId.streakFreeze,
+      );
+      final item = _items.firstWhere((i) => i.id == id);
+      item.owned = int.tryParse(parts[1]) ?? 1;
+    }
+    _activeXpBoostSessions = prefs.getInt(_keyBoostSessions) ?? 0;
+    _streakFreezesUsed = prefs.getInt(_keyFreezesUsed) ?? 0;
+    _activeCatCosmetic = prefs.getString(_keyCatCosmetic);
+    _activeSanctuaryCosmetic = prefs.getString(_keySanctuaryCosmetic);
+  }
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
@@ -72,6 +128,17 @@ class ShopProvider extends ChangeNotifier {
   }
 
   Future<void> _save() async {
+    if (_userId != null) {
+      for (final item in _items.where((i) => i.owned > 0)) {
+        await _repo.addToInventory(_userId!, item.id.name, quantity: item.owned);
+      }
+      await _repo.updateXpBoost(_userId!, _activeXpBoostSessions);
+      await _repo.updateCosmetics(
+        _userId!,
+        catCosmetic: _activeCatCosmetic,
+        sanctuaryCosmetic: _activeSanctuaryCosmetic,
+      );
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
       _keyInventory,
@@ -145,62 +212,13 @@ class ShopProvider extends ChangeNotifier {
 
   static List<ShopItem> _allItems() {
     return [
-      ShopItem(
-        id: ShopItemId.streakFreeze,
-        title: 'Congelar Racha',
-        description: 'Preserva tu racha si olvidas estudiar un día',
-        xpCost: 200,
-        icon: Icons.ac_unit_rounded,
-        color: const Color(0xFF06B6D4),
-      ),
-      ShopItem(
-        id: ShopItemId.xpBoost,
-        title: 'Impulso XP',
-        description: 'Gana el doble de XP en tus próximas 3 sesiones',
-        xpCost: 100,
-        icon: Icons.bolt_rounded,
-        color: const Color(0xFFF59E0B),
-      ),
-      ShopItem(
-        id: ShopItemId.treeBoost,
-        title: 'Abono Mágico',
-        description: 'Acelera el crecimiento de tu árbol',
-        xpCost: 150,
-        icon: Icons.eco_rounded,
-        color: const Color(0xFF10B981),
-      ),
-      ShopItem(
-        id: ShopItemId.catHat,
-        title: 'Sombrero Elegante',
-        description: 'Un sombrero diminuto para tu gato',
-        xpCost: 300,
-        icon: Icons.face_5_rounded,
-        color: const Color(0xFFEC4899),
-      ),
-      ShopItem(
-        id: ShopItemId.catBowtie,
-        title: 'Corbatín Rojo',
-        description: 'Un elegante corbatín para tu mascota',
-        xpCost: 250,
-        icon: Icons.circle_rounded,
-        color: const Color(0xFFEF4444),
-      ),
-      ShopItem(
-        id: ShopItemId.starBackground,
-        title: 'Fondo Estelar',
-        description: 'Estrellas brillantes en el santuario',
-        xpCost: 500,
-        icon: Icons.nights_stay_rounded,
-        color: const Color(0xFF8B5CF6),
-      ),
-      ShopItem(
-        id: ShopItemId.goldenTree,
-        title: 'Árbol Dorado',
-        description: 'Transforma tu árbol en oro brillante',
-        xpCost: 800,
-        icon: Icons.auto_awesome_rounded,
-        color: const Color(0xFFD4AF37),
-      ),
+      ShopItem(id: ShopItemId.streakFreeze, title: 'Congelar Racha', description: 'Preserva tu racha si olvidas estudiar un día', xpCost: 200, icon: Icons.ac_unit_rounded, color: const Color(0xFF06B6D4)),
+      ShopItem(id: ShopItemId.xpBoost, title: 'Impulso XP', description: 'Gana el doble de XP en tus próximas 3 sesiones', xpCost: 100, icon: Icons.bolt_rounded, color: const Color(0xFFF59E0B)),
+      ShopItem(id: ShopItemId.treeBoost, title: 'Abono Mágico', description: 'Acelera el crecimiento de tu árbol', xpCost: 150, icon: Icons.eco_rounded, color: const Color(0xFF10B981)),
+      ShopItem(id: ShopItemId.catHat, title: 'Sombrero Elegante', description: 'Un sombrero diminuto para tu gato', xpCost: 300, icon: Icons.face_5_rounded, color: const Color(0xFFEC4899)),
+      ShopItem(id: ShopItemId.catBowtie, title: 'Corbatín Rojo', description: 'Un elegante corbatín para tu mascota', xpCost: 250, icon: Icons.circle_rounded, color: const Color(0xFFEF4444)),
+      ShopItem(id: ShopItemId.starBackground, title: 'Fondo Estelar', description: 'Estrellas brillantes en el santuario', xpCost: 500, icon: Icons.nights_stay_rounded, color: const Color(0xFF8B5CF6)),
+      ShopItem(id: ShopItemId.goldenTree, title: 'Árbol Dorado', description: 'Transforma tu árbol en oro brillante', xpCost: 800, icon: Icons.auto_awesome_rounded, color: const Color(0xFFD4AF37)),
     ];
   }
 }

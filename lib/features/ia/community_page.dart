@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/supabase/supabase_client.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -12,6 +12,8 @@ class CommunityPage extends StatefulWidget {
 class _CommunityPageState extends State<CommunityPage> {
   String _searchQuery = '';
   String _selectedTab = 'ranking';
+  List<Map<String, dynamic>> _leaderboard = [];
+  bool _loading = true;
 
   final List<Map<String, dynamic>> _ranking = [
     {'title': 'Sistema Cardiovascular', 'author': 'María G.', 'subject': 'Anatomía', 'votes': 234, 'comments': 18, 'difficulty': 'Intermedio', 'color': AppColors.anatomyRed, 'icon': Icons.favorite_rounded, 'isVoted': false},
@@ -32,6 +34,29 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadLeaderboard();
+  }
+
+  Future<void> _loadLeaderboard() async {
+    try {
+      final data = await SupabaseConfig.client.from('profiles')
+          .select('name, current_xp, level')
+          .order('current_xp', ascending: false)
+          .limit(10);
+      if (mounted) {
+        setState(() {
+          _leaderboard = (data as List).cast<Map<String, dynamic>>();
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -42,9 +67,7 @@ class _CommunityPageState extends State<CommunityPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Compartir resumen - Próximamente')),
-            ),
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compartir resumen - Próximamente'))),
           ),
         ],
       ),
@@ -62,11 +85,7 @@ class _CommunityPageState extends State<CommunityPage> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.darkCard,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-        ),
+        decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
         child: TextField(
           onChanged: (v) => setState(() => _searchQuery = v),
           style: const TextStyle(color: AppColors.lightText),
@@ -74,12 +93,7 @@ class _CommunityPageState extends State<CommunityPage> {
             hintText: 'Buscar resúmenes, temas...',
             hintStyle: const TextStyle(color: AppColors.secondaryText),
             prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
-            suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear_rounded, color: AppColors.secondaryText),
-                    onPressed: () => setState(() => _searchQuery = ''),
-                  )
-                : null,
+            suffixIcon: _searchQuery.isNotEmpty ? IconButton(icon: const Icon(Icons.clear_rounded, color: AppColors.secondaryText), onPressed: () => setState(() => _searchQuery = '')) : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -92,12 +106,10 @@ class _CommunityPageState extends State<CommunityPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
-      child: Row(
-        children: [
-          _buildTab('ranking', 'Ranking'),
-          _buildTab('mine', 'Mis Resúmenes'),
-        ],
-      ),
+      child: Row(children: [
+        _buildTab('ranking', 'Ranking'),
+        _buildTab('mine', 'Mis Resúmenes'),
+      ]),
     );
   }
 
@@ -108,10 +120,7 @@ class _CommunityPageState extends State<CommunityPage> {
         onTap: () => setState(() => _selectedTab = id),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.transparent,
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-          ),
+          decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.transparent, borderRadius: const BorderRadius.all(Radius.circular(12))),
           child: Text(label, textAlign: TextAlign.center, style: TextStyle(color: selected ? Colors.white : AppColors.secondaryText, fontWeight: FontWeight.bold, fontSize: 12)),
         ),
       ),
@@ -124,26 +133,17 @@ class _CommunityPageState extends State<CommunityPage> {
       children: [
         _buildTopContributors(),
         const SizedBox(height: 20),
-        _buildFirestoreLeaderboard(),
+        _buildLeaderboardCard(),
         const SizedBox(height: 20),
-        Row(
-          children: [
-            const Text('Top Resúmenes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(8))),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.emoji_events_rounded, size: 14, color: AppColors.gold),
-                  const SizedBox(width: 4),
-                  const Text('Esta semana', style: TextStyle(color: AppColors.lightText, fontSize: 11)),
-                ],
-              ),
-            ),
-          ],
-        ),
+        Row(children: [
+          const Text('Top Resúmenes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(8))),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.emoji_events_rounded, size: 14, color: AppColors.gold), const SizedBox(width: 4), const Text('Esta semana', style: TextStyle(color: AppColors.lightText, fontSize: 11))]),
+          ),
+        ]),
         const SizedBox(height: 12),
         ..._filteredRanking.asMap().entries.map((e) => _buildRankingItem(e.value, e.key + 1)),
       ],
@@ -158,102 +158,78 @@ class _CommunityPageState extends State<CommunityPage> {
         borderRadius: const BorderRadius.all(Radius.circular(16)),
         boxShadow: [BoxShadow(color: AppColors.gold.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 2)],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(children: [Icon(Icons.emoji_events_rounded, color: Colors.white, size: 24), SizedBox(width: 8), Text('Top Contribuidores', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))]),
-          const SizedBox(height: 16),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            _buildContributor('María G.', 234, 1),
-            _buildContributor('Carlos R.', 189, 2),
-            _buildContributor('Ana L.', 156, 3),
-          ]),
-        ],
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Row(children: [Icon(Icons.emoji_events_rounded, color: Colors.white, size: 24), SizedBox(width: 8), Text('Top Contribuidores', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))]),
+        const SizedBox(height: 16),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          _buildContributor('María G.', 234, 1),
+          _buildContributor('Carlos R.', 189, 2),
+          _buildContributor('Ana L.', 156, 3),
+        ]),
+      ]),
     );
   }
 
   Widget _buildContributor(String name, int votes, int position) {
     return Column(children: [
-      Container(
-        width: 50, height: 50,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.2), border: Border.all(color: Colors.white, width: 2)),
-        child: Center(child: Text(name[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20))),
-      ),
+      Container(width: 50, height: 50, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.2), border: Border.all(color: Colors.white, width: 2)),
+        child: Center(child: Text(name[0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)))),
       const SizedBox(height: 8),
       Text(name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
       Text('$votes votos', style: const TextStyle(color: Colors.white70, fontSize: 10)),
     ]);
   }
 
-  Widget _buildFirestoreLeaderboard() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').orderBy('xp', descending: true).limit(10).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-        }
+  Widget _buildLeaderboardCard() {
+    if (_loading) return const Center(child: CircularProgressIndicator(color: AppColors.primary));
 
-        final users = snapshot.data?.docs ?? [];
-        if (users.isEmpty) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
+            child: const Icon(Icons.leaderboard_rounded, color: AppColors.gold, size: 18)),
+          const SizedBox(width: 8),
+          const Text('Leaderboard', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+        ]),
+        const SizedBox(height: 16),
+        if (_leaderboard.isEmpty)
+          const Text('No hay datos disponibles', style: TextStyle(color: AppColors.secondaryText))
+        else
+          ..._leaderboard.asMap().entries.map((entry) {
+            final data = entry.value;
+            final rank = entry.key + 1;
+            final name = data['name'] as String? ?? 'Estudiante';
+            final xp = (data['current_xp'] as num?)?.toInt() ?? 0;
+            final level = (data['level'] as num?)?.toInt() ?? 1;
 
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
-                  child: const Icon(Icons.leaderboard_rounded, color: AppColors.gold, size: 18),
-                ),
+            Color rankColor;
+            if (rank == 1) { rankColor = AppColors.gold; }
+            else if (rank == 2) { rankColor = AppColors.secondaryText; }
+            else if (rank == 3) { rankColor = AppColors.pharmacologyOrange; }
+            else { rankColor = AppColors.secondaryText; }
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: rank <= 3 ? rankColor.withValues(alpha: 0.05) : Colors.transparent,
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                border: rank <= 3 ? Border.all(color: rankColor.withValues(alpha: 0.2)) : null,
+              ),
+              child: Row(children: [
+                Container(width: 28, height: 28, decoration: BoxDecoration(shape: BoxShape.circle, color: rankColor.withValues(alpha: 0.15)),
+                  child: Center(child: Text('$rank', style: TextStyle(color: rankColor, fontSize: 12, fontWeight: FontWeight.bold)))),
+                const SizedBox(width: 12),
+                Expanded(child: Text(name, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600))),
+                Text('Nv. $level', style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
                 const SizedBox(width: 8),
-                const Text('Leaderboard', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+                Text('$xp XP', style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
               ]),
-              const SizedBox(height: 16),
-              ...users.asMap().entries.map((entry) {
-                final data = entry.value.data() as Map<String, dynamic>? ?? {};
-                final rank = entry.key + 1;
-                final name = data['name'] as String? ?? 'Estudiante';
-                final xp = (data['xp'] as num?)?.toInt() ?? 0;
-                final level = (data['level'] as num?)?.toInt() ?? 1;
-
-                Color rankColor;
-                if (rank == 1) { rankColor = AppColors.gold; }
-                else if (rank == 2) { rankColor = AppColors.secondaryText; }
-                else if (rank == 3) { rankColor = AppColors.pharmacologyOrange; }
-                else { rankColor = AppColors.secondaryText; }
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: rank <= 3 ? rankColor.withValues(alpha: 0.05) : Colors.transparent,
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    border: rank <= 3 ? Border.all(color: rankColor.withValues(alpha: 0.2)) : null,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28, height: 28,
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: rankColor.withValues(alpha: 0.15)),
-                        child: Center(child: Text('$rank', style: TextStyle(color: rankColor, fontSize: 12, fontWeight: FontWeight.bold))),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(child: Text(name, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600))),
-                      Text('Nv. $level', style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
-                      const SizedBox(width: 8),
-                      Text('$xp XP', style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                );
-              }),
-            ],
-          ),
-        );
-      },
+            );
+          }),
+      ]),
     );
   }
 
@@ -261,57 +237,38 @@ class _CommunityPageState extends State<CommunityPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: (item['color'] as Color).withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: (item['color'] as Color).withValues(alpha: 0.2)),
-              child: Icon(item['icon'] as IconData, color: item['color'] as Color, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(item['title'] as String, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-              const SizedBox(height: 4),
-              Row(children: [
-                Text('Por ${item['author']}', style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(4))),
-                  child: Text(item['difficulty'] as String, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-                ),
-              ]),
-            ])),
-            Container(
-              width: 32, height: 32,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: position <= 3 ? AppColors.gold.withValues(alpha: 0.2) : AppColors.border),
-              child: Center(child: Text('$position', style: TextStyle(color: position <= 3 ? AppColors.gold : AppColors.secondaryText, fontWeight: FontWeight.bold, fontSize: 14))),
-            ),
-          ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            _buildActionChip(Icons.thumb_up_rounded, '${item['votes']}', item['isVoted'] ? AppColors.primary : AppColors.secondaryText, () {
-              setState(() {
-                item['isVoted'] = !item['isVoted'];
-                item['votes'] = item['isVoted'] ? item['votes'] + 1 : item['votes'] - 1;
-              });
-            }),
-            const SizedBox(width: 12),
-            _buildActionChip(Icons.comment_rounded, '${item['comments']}', AppColors.secondaryText, () {}),
-            const Spacer(),
-            _buildActionChip(Icons.bookmark_rounded, '', AppColors.secondaryText, () {}),
-            const SizedBox(width: 8),
-            _buildActionChip(Icons.share_rounded, '', AppColors.secondaryText, () {}),
-          ]),
-        ],
-      ),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: (item['color'] as Color).withValues(alpha: 0.3))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: (item['color'] as Color).withValues(alpha: 0.2)),
+            child: Icon(item['icon'] as IconData, color: item['color'] as Color, size: 22)),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(item['title'] as String, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+            const SizedBox(height: 4),
+            Row(children: [
+              Text('Por ${item['author']}', style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+              const SizedBox(width: 8),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(4))),
+                child: Text(item['difficulty'] as String, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold))),
+            ]),
+          ])),
+          Container(width: 32, height: 32, decoration: BoxDecoration(shape: BoxShape.circle, color: position <= 3 ? AppColors.gold.withValues(alpha: 0.2) : AppColors.border),
+            child: Center(child: Text('$position', style: TextStyle(color: position <= 3 ? AppColors.gold : AppColors.secondaryText, fontWeight: FontWeight.bold, fontSize: 14)))),
+        ]),
+        const SizedBox(height: 12),
+        Row(children: [
+          _buildActionChip(Icons.thumb_up_rounded, '${item['votes']}', item['isVoted'] ? AppColors.primary : AppColors.secondaryText, () {
+            setState(() { item['isVoted'] = !item['isVoted']; item['votes'] = item['isVoted'] ? item['votes'] + 1 : item['votes'] - 1; });
+          }),
+          const SizedBox(width: 12),
+          _buildActionChip(Icons.comment_rounded, '${item['comments']}', AppColors.secondaryText, () {}),
+          const Spacer(),
+          _buildActionChip(Icons.bookmark_rounded, '', AppColors.secondaryText, () {}),
+          const SizedBox(width: 8),
+          _buildActionChip(Icons.share_rounded, '', AppColors.secondaryText, () {}),
+        ]),
+      ]),
     );
   }
 
@@ -337,15 +294,11 @@ class _CommunityPageState extends State<CommunityPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
           child: Row(children: [
-            Container(
-              width: 50, height: 50,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.2)),
-              child: const Icon(Icons.auto_graph_rounded, color: AppColors.primary, size: 24),
-            ),
+            Container(width: 50, height: 50, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.primary.withValues(alpha: 0.2)), child: const Icon(Icons.auto_graph_rounded, color: AppColors.primary, size: 24)),
             const SizedBox(width: 12),
             const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Tus Estadísticas', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text('2 resúmenes • 73 votos totales', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
             ])),
           ]),
@@ -362,18 +315,11 @@ class _CommunityPageState extends State<CommunityPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: (item['color'] as Color).withValues(alpha: 0.3)),
-      ),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: (item['color'] as Color).withValues(alpha: 0.3))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(color: (item['color'] as Color).withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
-            child: Icon(Icons.description_rounded, color: item['color'] as Color, size: 22),
-          ),
+          Container(width: 40, height: 40, decoration: BoxDecoration(color: (item['color'] as Color).withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
+            child: Icon(Icons.description_rounded, color: item['color'] as Color, size: 22)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(item['title'] as String, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.lightText)),

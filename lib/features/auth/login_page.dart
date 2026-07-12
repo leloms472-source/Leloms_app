@@ -1,10 +1,17 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/repositories/auth_repository.dart';
+import '../../core/repositories/profile_repository.dart';
+import '../../core/models/profile_model.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/sanctuary_provider.dart';
+import '../../providers/study_provider.dart';
+import '../../providers/achievement_provider.dart';
+import '../../providers/challenge_provider.dart';
+import '../../providers/shop_provider.dart';
 import '../home/home_page.dart';
 import '../../widgets/loading_overlay.dart';
 
@@ -17,6 +24,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
+  final AuthRepository _authRepo = AuthRepository();
   bool _isRegistering = false;
   late AnimationController _flipController;
   late Animation<double> _frontRotation;
@@ -43,8 +51,7 @@ class _LoginPageState extends State<LoginPage>
     ]).animate(_flipController);
 
     _backRotation = TweenSequence<double>([
-      TweenSequenceItem(
-          tween: Tween(begin: -pi / 2, end: -pi / 2), weight: 50.0),
+      TweenSequenceItem(tween: Tween(begin: -pi / 2, end: -pi / 2), weight: 50.0),
       TweenSequenceItem(tween: Tween(begin: -pi / 2, end: 0.0), weight: 50.0),
     ]).animate(_flipController);
   }
@@ -70,32 +77,30 @@ class _LoginPageState extends State<LoginPage>
     });
 
     try {
-      UserCredential credential;
       if (_isRegistering) {
-        credential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
+        await _authRepo.signUpWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text,
+          name: _nameController.text.trim(),
         );
-        await credential.user!.updateDisplayName(_nameController.text.trim());
       } else {
-        credential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
+        await _authRepo.signInWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text,
         );
       }
 
       if (!mounted) return;
-      final userProvider = context.read<UserProvider>();
-      userProvider.setLoggedIn(true);
-      userProvider.setUserName(
-          credential.user?.displayName ?? _nameController.text.trim());
+      await _loadUserData();
 
       _navigateToHome();
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       setState(() {
-        _errorMessage = _getAuthErrorMessage(e.code);
+        _errorMessage = _getAuthErrorMessage(e.message);
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error de autenticación. Intenta de nuevo.';
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -109,22 +114,11 @@ class _LoginPageState extends State<LoginPage>
     });
 
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        if (mounted) setState(() => _isLoading = false);
-        return;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      await _authRepo.signInWithGoogle();
 
       if (!mounted) return;
-      context.read<UserProvider>().setLoggedIn(true);
+      await _loadUserData();
+
       _navigateToHome();
     } catch (e) {
       if (mounted) {
@@ -134,6 +128,36 @@ class _LoginPageState extends State<LoginPage>
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    final user = _authRepo.currentUser;
+    if (user == null) return;
+
+    final userProvider = context.read<UserProvider>();
+    final profileRepo = ProfileRepository();
+    final profile = await profileRepo.getProfile(user.id);
+
+    if (profile != null) {
+      userProvider.setProfile(profile);
+    } else {
+      final newProfile = ProfileModel(
+        id: user.id,
+        name: user.userMetadata?['name'] as String? ?? 'Estudiante',
+        email: user.email,
+      );
+      await profileRepo.upsertProfile(newProfile);
+      userProvider.setProfile(newProfile);
+    }
+
+    if (mounted) {
+      final uid = user.id;
+      context.read<SanctuaryProvider>().loadFromServer(uid);
+      context.read<StudyProvider>().loadFromServer(uid);
+      context.read<AchievementProvider>().loadFromServer(uid);
+      context.read<ChallengeProvider>().loadFromServer(uid);
+      context.read<ShopProvider>().loadFromServer(uid);
     }
   }
 
@@ -160,22 +184,26 @@ class _LoginPageState extends State<LoginPage>
   }
 
   String _getAuthErrorMessage(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'No hay cuenta con este correo';
-      case 'wrong-password':
-        return 'Contraseña incorrecta';
-      case 'email-already-in-use':
-        return 'Este correo ya está registrado';
-      case 'invalid-email':
-        return 'Correo electrónico inválido';
-      case 'weak-password':
-        return 'Contraseña muy débil';
-      case 'too-many-requests':
-        return 'Demasiados intentos. Espera un momento';
-      default:
-        return 'Error de autenticación. Intenta de nuevo';
+    final lower = code.toLowerCase();
+    if (lower.contains('user not found') || lower.contains('not found')) {
+      return 'No hay cuenta con este correo';
     }
+    if (lower.contains('wrong password') || lower.contains('invalid password') || lower.contains('invalid_credentials')) {
+      return 'Contraseña incorrecta';
+    }
+    if (lower.contains('already exists') || lower.contains('already registered') || lower.contains('email already')) {
+      return 'Este correo ya está registrado';
+    }
+    if (lower.contains('invalid email')) {
+      return 'Correo electrónico inválido';
+    }
+    if (lower.contains('weak password')) {
+      return 'Contraseña muy débil';
+    }
+    if (lower.contains('rate limit') || lower.contains('too many')) {
+      return 'Demasiados intentos. Espera un momento';
+    }
+    return code;
   }
 
   void _navigateToHome() {
@@ -229,49 +257,24 @@ class _LoginPageState extends State<LoginPage>
     return Column(
       children: [
         Container(
-          width: 90,
-          height: 90,
+          width: 90, height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const LinearGradient(
               colors: [AppColors.primary, AppColors.secondary, AppColors.tertiary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 20,
-                spreadRadius: 3,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 3)],
           ),
           child: const Icon(Icons.pets_rounded, size: 50, color: Colors.white),
         ),
         const SizedBox(height: 16),
         ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [AppColors.primary, AppColors.secondary],
-          ).createShader(bounds),
-          child: const Text(
-            'LELOMS',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 4,
-              color: Colors.white,
-            ),
-          ),
+          shaderCallback: (bounds) => const LinearGradient(colors: [AppColors.primary, AppColors.secondary]).createShader(bounds),
+          child: const Text('LELOMS', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, letterSpacing: 4, color: Colors.white)),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Guía del Estudiante',
-          style: TextStyle(
-            fontSize: 14,
-            letterSpacing: 2,
-            color: AppColors.secondaryText,
-          ),
-        ),
+        const Text('Guía del Estudiante', style: TextStyle(fontSize: 14, letterSpacing: 2, color: AppColors.secondaryText)),
       ],
     );
   }
@@ -328,11 +331,8 @@ class _LoginPageState extends State<LoginPage>
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {},
-            child: const Text(
-              '¿Olvidaste tu contraseña?',
-              style: TextStyle(color: AppColors.primary, fontSize: 12),
-            ),
+            onPressed: () => _handleForgotPassword(),
+            child: const Text('¿Olvidaste tu contraseña?', style: TextStyle(color: AppColors.primary, fontSize: 12)),
           ),
         ),
         const SizedBox(height: 16),
@@ -370,6 +370,26 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
+  Future<void> _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+      setState(() => _errorMessage = 'Ingresa un correo válido primero');
+      return;
+    }
+    try {
+      await _authRepo.resetPassword(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Correo de recuperación enviado'), backgroundColor: AppColors.success),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = 'Error al enviar correo de recuperación');
+      }
+    }
+  }
+
   Widget _buildErrorBanner() {
     if (_errorMessage == null) return const SizedBox.shrink();
     return Padding(
@@ -379,35 +399,18 @@ class _LoginPageState extends State<LoginPage>
         decoration: BoxDecoration(
           color: AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: AppColors.error.withValues(alpha: 0.3),
-          ),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline_rounded,
-                color: AppColors.error, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(
-                  color: AppColors.error,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: Row(children: [
+          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
+          const SizedBox(width: 8),
+          Expanded(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.error, fontSize: 13))),
+        ]),
       ),
     );
   }
 
-  Widget _buildAuthCard({
-    required String title,
-    required String subtitle,
-    required List<Widget> children,
-  }) {
+  Widget _buildAuthCard({required String title, required String subtitle, required List<Widget> children}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -415,225 +418,108 @@ class _LoginPageState extends State<LoginPage>
         color: AppColors.darkCard.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-        ],
+        boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.1), blurRadius: 30, spreadRadius: 5)],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.lightText,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.secondaryText,
-            ),
-          ),
-          const SizedBox(height: 28),
-          ...children,
-        ],
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+        const SizedBox(height: 8),
+        Text(subtitle, style: const TextStyle(fontSize: 13, color: AppColors.secondaryText)),
+        const SizedBox(height: 28),
+        ...children,
+      ]),
     );
   }
 
   Widget _buildNameField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Nombre completo',
-          style: TextStyle(
-            color: AppColors.secondaryText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: _nameController,
-          style: const TextStyle(color: AppColors.lightText),
-          decoration: const InputDecoration(
-            hintText: 'Tu nombre',
-            prefixIcon:
-                Icon(Icons.person_outline_rounded, color: AppColors.primary),
-          ),
-        ),
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Nombre completo', style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontWeight: FontWeight.w500)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: _nameController,
+        style: const TextStyle(color: AppColors.lightText),
+        decoration: const InputDecoration(hintText: 'Tu nombre', prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.primary)),
+      ),
+    ]);
   }
 
   Widget _buildEmailField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Correo electrónico',
-          style: TextStyle(
-            color: AppColors.secondaryText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: _emailController,
-          keyboardType: TextInputType.emailAddress,
-          style: const TextStyle(color: AppColors.lightText),
-          decoration: const InputDecoration(
-            hintText: 'correo@ejemplo.com',
-            prefixIcon:
-                Icon(Icons.email_outlined, color: AppColors.primary),
-          ),
-        ),
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Correo electrónico', style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontWeight: FontWeight.w500)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: _emailController,
+        keyboardType: TextInputType.emailAddress,
+        style: const TextStyle(color: AppColors.lightText),
+        decoration: const InputDecoration(hintText: 'correo@ejemplo.com', prefixIcon: Icon(Icons.email_outlined, color: AppColors.primary)),
+      ),
+    ]);
   }
 
   Widget _buildPasswordField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Contraseña',
-          style: TextStyle(
-            color: AppColors.secondaryText,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Contraseña', style: TextStyle(color: AppColors.secondaryText, fontSize: 12, fontWeight: FontWeight.w500)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: _passwordController,
+        obscureText: _obscurePassword,
+        style: const TextStyle(color: AppColors.lightText),
+        decoration: InputDecoration(
+          hintText: 'Mínimo 8 caracteres',
+          prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
+          suffixIcon: IconButton(
+            icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: AppColors.secondaryText),
+            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
           ),
         ),
-        const SizedBox(height: 6),
-        TextField(
-          controller: _passwordController,
-          obscureText: _obscurePassword,
-          style: const TextStyle(color: AppColors.lightText),
-          decoration: InputDecoration(
-            hintText: 'Mínimo 8 caracteres',
-            prefixIcon:
-                const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                color: AppColors.secondaryText,
-              ),
-              onPressed: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
-            ),
-          ),
-        ),
-      ],
-    );
+      ),
+    ]);
   }
 
   Widget _buildPrimaryButton(String label, VoidCallback onPressed) {
     return SizedBox(
-      width: double.infinity,
-      height: 50,
+      width: double.infinity, height: 50,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          elevation: 0,
+          backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), elevation: 0,
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
       ),
     );
   }
 
   Widget _buildGoogleButton() {
     return SizedBox(
-      width: double.infinity,
-      height: 50,
+      width: double.infinity, height: 50,
       child: OutlinedButton.icon(
         onPressed: _handleGoogleSignIn,
         icon: const Icon(Icons.g_mobiledata, size: 24, color: Colors.white),
-        label: const Text(
-          'Continuar con Google',
-          style: TextStyle(color: AppColors.lightText),
-        ),
+        label: const Text('Continuar con Google', style: TextStyle(color: AppColors.lightText)),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
           backgroundColor: Colors.white.withValues(alpha: 0.05),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
     );
   }
 
   Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.border.withValues(alpha: 0.5),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'o',
-            style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.border.withValues(alpha: 0.5),
-          ),
-        ),
-      ],
-    );
+    return Row(children: [
+      Expanded(child: Container(height: 1, color: AppColors.border.withValues(alpha: 0.5))),
+      const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('o', style: TextStyle(color: AppColors.secondaryText, fontSize: 13))),
+      Expanded(child: Container(height: 1, color: AppColors.border.withValues(alpha: 0.5))),
+    ]);
   }
 
   Widget _buildToggleText() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          _isRegistering ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? ',
-          style: const TextStyle(color: AppColors.secondaryText),
-        ),
-        TextButton(
-          onPressed: _toggleMode,
-          child: Text(
-            _isRegistering ? 'Inicia sesión' : 'Regístrate',
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Text(_isRegistering ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? ', style: const TextStyle(color: AppColors.secondaryText)),
+      TextButton(
+        onPressed: _toggleMode,
+        child: Text(_isRegistering ? 'Inicia sesión' : 'Regístrate', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+      ),
+    ]);
   }
-
 }

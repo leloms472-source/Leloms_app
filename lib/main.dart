@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
+import 'core/supabase/supabase_client.dart';
 import 'features/auth/splash_page.dart';
 import 'providers/user_provider.dart';
 import 'providers/sanctuary_provider.dart' show SanctuaryProvider, TreeStage;
@@ -12,17 +12,13 @@ import 'providers/achievement_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/challenge_provider.dart';
 import 'providers/shop_provider.dart';
-import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await SupabaseConfig.initialize();
 
   final themeProvider = ThemeProvider();
   await themeProvider.initialize();
-
-  final notificationService = NotificationService();
-  await notificationService.initialize();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -158,7 +154,7 @@ ThemeData _buildLightTheme() {
       elevation: 0,
       centerTitle: false,
       titleTextStyle: AppTypography.titleLarge,
-      iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
+      iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
     ),
     cardTheme: CardThemeData(
       color: AppColors.lightCard,

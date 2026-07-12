@@ -1,19 +1,14 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._();
   factory NotificationService() => _instance;
   NotificationService._();
 
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
-  String? _deviceToken;
 
   bool get isInitialized => _initialized;
-  String? get deviceToken => _deviceToken;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -26,51 +21,14 @@ class NotificationService {
     );
 
     await _localNotifications.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: _onNotificationTap,
     );
-
-    await _requestPermission();
-
-    _deviceToken = await _messaging.getToken();
-
-    FirebaseMessaging.onMessage.listen(_onForegroundMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onNotificationTapData);
-
-    if (await _messaging.getInitialMessage() != null) {
-      _onNotificationTapData(null);
-    }
 
     _initialized = true;
   }
 
-  Future<void> _requestPermission() async {
-    await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-  }
-
-  void _onForegroundMessage(RemoteMessage message) {
-    final notification = message.notification;
-    if (notification != null) {
-      _showLocalNotification(
-        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title: notification.title ?? '',
-        body: notification.body ?? '',
-      );
-    }
-  }
-
   void _onNotificationTap(NotificationResponse response) {}
-
-  void _onNotificationTapData(RemoteMessage? message) {
-    if (message?.data.isNotEmpty == true) {}
-  }
 
   Future<void> _showLocalNotification({
     required int id,
@@ -91,10 +49,7 @@ class NotificationService {
       id,
       title,
       body,
-      const NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      ),
+      const NotificationDetails(android: androidDetails, iOS: iosDetails),
       payload: payload,
     );
   }
@@ -133,11 +88,7 @@ class NotificationService {
 
     for (int i = 0; i < 30; i++) {
       final dayTime = scheduledTime.add(Duration(days: i));
-      scheduleStudyReminder(
-        title: title,
-        body: body,
-        scheduledTime: dayTime,
-      );
+      scheduleStudyReminder(title: title, body: body, scheduledTime: dayTime);
     }
   }
 

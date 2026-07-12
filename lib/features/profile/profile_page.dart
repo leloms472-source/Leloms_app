@@ -156,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(width: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(color: AppColors.tertiary.withValues(alpha: 0.2), borderRadius: const BorderRadius.circular(20)),
+          decoration: BoxDecoration(color: AppColors.tertiary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.local_fire_department_rounded, size: 14, color: AppColors.tertiary),
             const SizedBox(width: 4),
@@ -190,7 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildBadge(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: const BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
       child: Text(text, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
     );
   }
@@ -212,7 +212,7 @@ class _ProfilePageState extends State<ProfilePage> {
       childAspectRatio: 0.85,
       children: stats.map((stat) {
         return Container(
-          decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(stat['icon'] as IconData, color: stat['color'] as Color, size: 24),
             const SizedBox(height: 8),
@@ -227,7 +227,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildAccountInfo() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           const Text('Mi Cuenta', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
@@ -263,7 +263,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(
@@ -329,16 +329,16 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 8),
           const Text('Toca para visitar tu santuario\ny cuidar de Leloms', textAlign: TextAlign.center, style: TextStyle(color: AppColors.secondaryText, fontSize: 14, height: 1.5)),
           const SizedBox(height: 16),
-          const Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [AppColors.primary, AppColors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary], begin: Alignment.topLeft, end: Alignment.bottomRight),
               borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.pets_rounded, size: 16, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Visitar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+              const Icon(Icons.pets_rounded, size: 16, color: Colors.white),
+              const SizedBox(width: 8),
+              const Text('Visitar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
             ]),
           ),
         ]),
@@ -349,7 +349,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildSettings() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Configuración', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
         const SizedBox(height: 16),
@@ -402,7 +402,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSupport() {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
       child: Column(children: [
         ListTile(leading: const Icon(Icons.help_outline_rounded, color: AppColors.secondaryText), title: const Text('Centro de Ayuda', style: TextStyle(color: AppColors.lightText)), trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText), onTap: () {}),
         ListTile(leading: const Icon(Icons.description_outlined, color: AppColors.secondaryText), title: const Text('Términos y Condiciones', style: TextStyle(color: AppColors.lightText)), trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText), onTap: () {}),

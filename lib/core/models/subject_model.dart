@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+
+class SubjectModel {
+  final String id;
+  final String name;
+  final String? description;
+  final double progress;
+  final int resources;
+  final int completed;
+  final Color color;
+  final IconData icon;
+
+  SubjectModel({
+    required this.id,
+    required this.name,
+    this.description,
+    this.progress = 0.0,
+    this.resources = 0,
+    this.completed = 0,
+    this.color = const Color(0xFF6366F1),
+    this.icon = Icons.school_rounded,
+  });
+
+  factory SubjectModel.fromMap(String id, Map<String, dynamic> map) {
+    return SubjectModel(
+      id: id,
+      name: map['name'] as String? ?? '',
+      description: map['description'] as String?,
+      progress: (map['progress'] as num?)?.toDouble() ?? 0.0,
+      resources: (map['resources'] as num?)?.toInt() ?? 0,
+      completed: (map['completed'] as num?)?.toInt() ?? 0,
+      color: Color(map['color'] as int? ?? 0xFF6366F1),
+      icon: Icons.school_rounded,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'description': description,
+        'progress': progress,
+        'resources': resources,
+        'completed': completed,
+        'color': color.toARGB32(),
+      };
+}

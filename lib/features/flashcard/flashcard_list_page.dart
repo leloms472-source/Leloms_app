@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/flashcard.dart';
 import '../../services/firestore_service.dart';
 import 'flashcard_page.dart';
 import 'review_queue_page.dart';
@@ -24,13 +25,11 @@ class FlashcardListPage extends StatelessWidget {
           ),
         ],
       ),
-      body: StreamBuilder(
-        stream: firestore.getFlashcards(),
+      body: FutureBuilder<List<Flashcard>>(
+        future: firestore.getFlashcards(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           final flashcards = snapshot.data ?? [];
@@ -40,21 +39,11 @@ class FlashcardListPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.credit_card_rounded,
-                      size: 80,
-                      color: AppColors.secondaryText.withValues(alpha: 0.5)),
+                  Icon(Icons.credit_card_rounded, size: 80, color: AppColors.secondaryText.withValues(alpha: 0.5)),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No hay flashcards disponibles',
-                    style: TextStyle(
-                        color: AppColors.secondaryText, fontSize: 18),
-                  ),
+                  const Text('No hay flashcards', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.lightText)),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Conecta Firebase Console para agregar flashcards',
-                    style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
+                  const Text('Crea flashcards para estudiar', style: TextStyle(color: AppColors.secondaryText)),
                 ],
               ),
             );
@@ -62,97 +51,59 @@ class FlashcardListPage extends StatelessWidget {
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: flashcards.length,
+            itemCount: flashcards.length + 1,
             itemBuilder: (context, index) {
-              final card = flashcards[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Material(
-                  color: AppColors.darkCard,
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
-                  child: InkWell(
-                    borderRadius: const BorderRadius.all(Radius.circular(16)),
-                    onTap: () {
-                      // Group flashcards by subject and start session
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FlashcardPage(
-                            flashcards: [card],
-                            title: card.subject,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.pharmacologyOrange
-                                  .withValues(alpha: 0.2),
-                            ),
-                            child: const Icon(
-                              Icons.credit_card_rounded,
-                              color: AppColors.pharmacologyOrange,
-                              size: 28,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  card.front,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.lightText,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  card.subject,
-                                  style: const TextStyle(
-                                    color: AppColors.secondaryText,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (card.isLearned)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.2),
-                                 borderRadius: const BorderRadius.all(Radius.circular(8)),
-                              ),
-                              child: const Text(
-                                '✅',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right_rounded,
-                              color: AppColors.secondaryText),
-                        ],
-                      ),
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(children: [
+                    const Text('Todas las flashcards', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
+                      child: Text('${flashcards.length}', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                     ),
-                  ),
-                ),
-              );
+                  ]),
+                );
+              }
+
+              final card = flashcards[index - 1];
+              return _buildCardItem(context, card);
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildCardItem(BuildContext context, dynamic card) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => FlashcardPage(flashcards: [card], title: 'Flashcard'))),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: AppColors.border.withValues(alpha: 0.3))),
+            child: Row(children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: card.isDueForReview ? AppColors.pharmacologyOrange.withValues(alpha: 0.15) : AppColors.success.withValues(alpha: 0.15)),
+                child: Icon(card.isDueForReview ? Icons.schedule_rounded : Icons.check_circle_rounded, color: card.isDueForReview ? AppColors.pharmacologyOrange : AppColors.success, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(card.front, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                Text(card.subject, style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
+              ])),
+              Icon(card.isLearned ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, color: card.isLearned ? AppColors.success : AppColors.secondaryText, size: 20),
+            ]),
+          ),
+        ),
       ),
     );
   }

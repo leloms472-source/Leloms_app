@@ -1,46 +1,42 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
+import '../core/supabase/supabase_client.dart';
 import '../models/subject.dart';
 import '../models/quiz.dart';
 import '../models/flashcard.dart';
 import '../models/summary.dart';
 
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  static final SupabaseClient _client = SupabaseConfig.client;
 
   // Subjects
-  Stream<List<Subject>> getSubjects() {
-    return _db.collection('subjects').snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Subject.fromMap(doc.id, doc.data())).toList());
+  Future<List<Subject>> getSubjects() async {
+    final data = await _client.from('subjects').select().order('name');
+    return (data as List).map((d) => Subject.fromMap(d['id'] as String, d)).toList();
   }
 
   // Quizzes
-  Stream<List<Quiz>> getQuizzes({String? subject}) {
-    Query query = _db.collection('quizzes');
-    if (subject != null) {
-      query = query.where('subject', isEqualTo: subject);
-    }
-    return query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Quiz.fromMap(doc.id, doc.data() as Map<String, dynamic>)).toList());
+  Future<List<Quiz>> getQuizzes({String? subject}) async {
+    var query = _client.from('quizzes').select();
+    if (subject != null) query = query.eq('subject', subject);
+    final data = await query.order('created_at', ascending: false);
+    return (data as List).map((d) => Quiz.fromMap(d['id'] as String, d as Map<String, dynamic>)).toList();
   }
 
   // Flashcards
-  Stream<List<Flashcard>> getFlashcards({String? subject}) {
-    Query query = _db.collection('flashcards');
-    if (subject != null) {
-      query = query.where('subject', isEqualTo: subject);
-    }
-    return query.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Flashcard.fromMap(doc.id, doc.data() as Map<String, dynamic>)).toList());
+  Future<List<Flashcard>> getFlashcards({String? subject}) async {
+    var query = _client.from('flashcards').select();
+    if (subject != null) query = query.eq('subject', subject);
+    final data = await query.order('created_at', ascending: false);
+    return (data as List).map((d) => Flashcard.fromMap(d['id'] as String, d as Map<String, dynamic>)).toList();
   }
 
   // Summaries
-  Stream<List<Summary>> getSummaries() {
-    return _db.collection('summaries').orderBy('votes', descending: true).snapshots().map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => Summary.fromMap(doc.id, doc.data())).toList());
+  Future<List<Summary>> getSummaries() async {
+    final data = await _client.from('summaries').select().order('votes', ascending: false);
+    return (data as List).map((d) => Summary.fromMap(d['id'] as String, d)).toList();
   }
 
   Future<void> voteSummary(String summaryId, int newVotes) async {
-    await _db.collection('summaries').doc(summaryId).update({'votes': newVotes});
+    await _client.from('summaries').update({'votes': newVotes}).eq('id', summaryId);
   }
 }

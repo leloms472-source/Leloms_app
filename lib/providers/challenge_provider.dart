@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/supabase/supabase_client.dart';
 
 enum ChallengeType { studyTime, flashcards, quizQuestions, streak, pomodoroSessions }
 
@@ -29,6 +30,7 @@ class ChallengeProvider extends ChangeNotifier {
   List<DailyChallenge> _challenges = [];
   DateTime _lastGenerated = DateTime(2000);
   int _completedRewardsClaimed = 0;
+  String? _userId;
 
   List<DailyChallenge> get challenges => List.unmodifiable(_challenges);
   int get completedCount => _challenges.where((c) => c.isCompleted).length;
@@ -40,6 +42,33 @@ class ChallengeProvider extends ChangeNotifier {
   static const _keyTargets = 'challenge_targets';
   static const _keyProgress = 'challenge_progress';
   static const _keyClaimed = 'challenge_claimed';
+
+  Future<void> loadFromServer(String userId) async {
+    _userId = userId;
+    try {
+      final today = DateTime.now();
+      final dateStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final data = await SupabaseConfig.client.from('challenges')
+          .select()
+          .eq('user_id', userId)
+          .eq('date', dateStr)
+          .order('created_at');
+      if ((data as List).isNotEmpty) {
+        _challenges = (data as List).map((d) => DailyChallenge(
+          type: ChallengeType.values.firstWhere((e) => e.name == d['challenge_type']),
+          target: (d['target'] as num).toInt(),
+          title: d['title'] as String,
+          description: d['description'] as String,
+          xpReward: (d['xp_reward'] as num).toInt(),
+          progress: (d['progress'] as num).toInt(),
+        )).toList();
+        _completedRewardsClaimed = _challenges.where((c) => c.isCompleted).length;
+        notifyListeners();
+        return;
+      }
+    } catch (_) {}
+    await initialize();
+  }
 
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
@@ -85,11 +114,11 @@ class ChallengeProvider extends ChangeNotifier {
     final selected = shuffled.take(3).toList();
     final targets = selected.map((t) {
       switch (t) {
-        case ChallengeType.studyTime: return 20 + rng.nextInt(3) * 10; // 20, 30, 40 min
-        case ChallengeType.flashcards: return 5 + rng.nextInt(3) * 5;  // 5, 10, 15
-        case ChallengeType.quizQuestions: return 3 + rng.nextInt(3) * 3; // 3, 6, 9
+        case ChallengeType.studyTime: return 20 + rng.nextInt(3) * 10;
+        case ChallengeType.flashcards: return 5 + rng.nextInt(3) * 5;
+        case ChallengeType.quizQuestions: return 3 + rng.nextInt(3) * 3;
         case ChallengeType.streak: return 3;
-        case ChallengeType.pomodoroSessions: return 2 + rng.nextInt(2); // 2, 3
+        case ChallengeType.pomodoroSessions: return 2 + rng.nextInt(2);
       }
     }).toList();
 
@@ -132,6 +161,24 @@ class ChallengeProvider extends ChangeNotifier {
     await prefs.setStringList(_keyTargets, _challenges.map((c) => c.target.toString()).toList());
     await prefs.setStringList(_keyProgress, _challenges.map((c) => c.progress.toString()).toList());
     await prefs.setInt(_keyClaimed, _completedRewardsClaimed);
+
+    if (_userId != null) {
+      for (final c in _challenges) {
+        try {
+          await SupabaseConfig.client.from('challenges').upsert({
+            'user_id': _userId!,
+            'challenge_type': c.type.name,
+            'target': c.target,
+            'title': c.title,
+            'description': c.description,
+            'xp_reward': c.xpReward,
+            'progress': c.progress,
+            'is_completed': c.isCompleted,
+            'date': '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+          });
+        } catch (_) {}
+      }
+    }
   }
 
   void addProgress(ChallengeType type, int amount) {

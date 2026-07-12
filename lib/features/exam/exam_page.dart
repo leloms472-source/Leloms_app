@@ -42,7 +42,8 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
     );
 
     final firestore = FirestoreService();
-    firestore.getQuizzes().first.then((quizzes) {
+    firestore.getQuizzes().then((quizzes) {
+      if (quizzes.isEmpty) return;
       if (!mounted) return;
       final allQuestions = <_ExamQuestion>[];
       for (final quiz in quizzes) {

@@ -47,17 +47,21 @@ class Flashcard {
   factory Flashcard.fromMap(String id, Map<String, dynamic> map) {
     return Flashcard(
       id: id,
-      front: map['front'] as String? ?? '',
-      back: map['back'] as String? ?? '',
+      front: map['front'] as String? ?? map['front'] as String? ?? '',
+      back: map['back'] as String? ?? map['back'] as String? ?? '',
       subject: map['subject'] as String? ?? '',
-      isLearned: map['isLearned'] as bool? ?? false,
-      easinessFactor: (map['easinessFactor'] as num?)?.toDouble() ?? 2.5,
-      interval: (map['interval'] as num?)?.toInt() ?? 0,
-      repetitions: (map['repetitions'] as num?)?.toInt() ?? 0,
-      nextReviewDate: map['nextReviewDate'] != null
-          ? DateTime.parse(map['nextReviewDate'] as String)
-          : null,
+      isLearned: (map['is_learned'] ?? map['isLearned'] ?? false) as bool,
+      easinessFactor: ((map['easiness_factor'] ?? map['easinessFactor'] ?? 2.5) as num).toDouble(),
+      interval: ((map['interval'] ?? 0) as num).toInt(),
+      repetitions: ((map['repetitions'] ?? 0) as num).toInt(),
+      nextReviewDate: _parseDate(map['next_review_date'] ?? map['nextReviewDate']),
     );
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return DateTime.parse(value);
+    return null;
   }
 }
 

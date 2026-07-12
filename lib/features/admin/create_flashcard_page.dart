@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/repositories/content_repository.dart';
+import '../../core/models/flashcard_model.dart';
+import '../../providers/user_provider.dart';
 
 class CreateFlashcardPage extends StatefulWidget {
   const CreateFlashcardPage({super.key});
@@ -10,6 +13,7 @@ class CreateFlashcardPage extends StatefulWidget {
 }
 
 class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
+  final ContentRepository _contentRepo = ContentRepository();
   final _frontCtrl = TextEditingController();
   final _backCtrl = TextEditingController();
   String _selectedSubject = 'Anatomía';
@@ -36,17 +40,15 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
     setState(() => _saving = true);
 
     try {
-      await FirebaseFirestore.instance.collection('flashcards').add({
-        'front': _frontCtrl.text.trim(),
-        'back': _backCtrl.text.trim(),
-        'subject': _selectedSubject,
-        'isLearned': false,
-        'easinessFactor': 2.5,
-        'interval': 0,
-        'repetitions': 0,
-        'nextReviewDate': null,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      final user = context.read<UserProvider>();
+      final flashcard = FlashcardModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: user.isLoggedIn ? null : null,
+        front: _frontCtrl.text.trim(),
+        back: _backCtrl.text.trim(),
+        subject: _selectedSubject,
+      );
+      await _contentRepo.addFlashcard(flashcard);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -89,82 +91,37 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.darkCard,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Anverso', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-                  ),
-                  child: TextField(
-                    controller: _frontCtrl,
-                    style: const TextStyle(color: AppColors.lightText, fontSize: 16),
-                    maxLines: 5,
-                    decoration: const InputDecoration(
-                      hintText: 'Término, concepto o pregunta...',
-                      hintStyle: TextStyle(color: AppColors.secondaryText),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border.withValues(alpha: 0.3))),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Anverso', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
+                child: TextField(controller: _frontCtrl, style: const TextStyle(color: AppColors.lightText, fontSize: 16), maxLines: 5, decoration: const InputDecoration(hintText: 'Término, concepto o pregunta...', hintStyle: TextStyle(color: AppColors.secondaryText), border: InputBorder.none)),
+              ),
+            ]),
           ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.darkCard,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Reverso', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.secondary.withValues(alpha: 0.2)),
-                  ),
-                  child: TextField(
-                    controller: _backCtrl,
-                    style: const TextStyle(color: AppColors.lightText, fontSize: 16),
-                    maxLines: 5,
-                    decoration: const InputDecoration(
-                      hintText: 'Definición, respuesta o explicación...',
-                      hintStyle: TextStyle(color: AppColors.secondaryText),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.border.withValues(alpha: 0.3))),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Reverso', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.secondary.withValues(alpha: 0.2))),
+                child: TextField(controller: _backCtrl, style: const TextStyle(color: AppColors.lightText, fontSize: 16), maxLines: 5, decoration: const InputDecoration(hintText: 'Definición, respuesta o explicación...', hintStyle: TextStyle(color: AppColors.secondaryText), border: InputBorder.none)),
+              ),
+            ]),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
             initialValue: _selectedSubject,
             dropdownColor: AppColors.darkCard,
             style: const TextStyle(color: AppColors.lightText),
-            decoration: const InputDecoration(
-              labelText: 'Asignatura',
-              labelStyle: TextStyle(color: AppColors.secondaryText),
-              filled: true,
-              fillColor: AppColors.darkCard,
-            ),
+            decoration: const InputDecoration(labelText: 'Asignatura', labelStyle: TextStyle(color: AppColors.secondaryText), filled: true, fillColor: AppColors.darkCard),
             items: _subjects.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
             onChanged: (v) => setState(() => _selectedSubject = v ?? _selectedSubject),
           ),

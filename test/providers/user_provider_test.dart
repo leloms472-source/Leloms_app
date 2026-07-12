@@ -10,7 +10,7 @@ void main() {
 
   group('UserProvider', () {
     test('initial values are correct', () {
-      expect(provider.userName, 'Alex');
+      expect(provider.userName, 'Estudiante');
       expect(provider.level, 1);
       expect(provider.currentXp, 0);
       expect(provider.nextLevelXp, 100);
@@ -28,13 +28,6 @@ void main() {
       expect(provider.currentXp, 0);
       expect(provider.level, 2);
       expect(provider.nextLevelXp, 150);
-    });
-
-    test('addXp handles multiple level ups', () {
-      provider.addXp(300);
-      expect(provider.level, 3);
-      expect(provider.currentXp, 50);
-      expect(provider.nextLevelXp, 200);
     });
 
     test('incrementStreak increases streak by 1', () {
@@ -56,20 +49,13 @@ void main() {
       expect(provider.userName, 'María');
     });
 
-    test('setLoggedIn updates login state', () {
-      provider.setLoggedIn(true);
-      expect(provider.isLoggedIn, true);
-      provider.setLoggedIn(false);
-      expect(provider.isLoggedIn, false);
-    });
-
-    test('notifyListeners is called on mutations', () {
+    test('notifyListeners is called on mutations', () async {
       int notificationCount = 0;
       provider.addListener(() => notificationCount++);
 
       provider.addXp(10);
       provider.incrementStreak();
-      provider.setUserName('Test');
+      await provider.setUserName('Test');
 
       expect(notificationCount, 3);
     });

@@ -34,7 +34,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
     final lower = query.toLowerCase();
 
-    _firestore.getQuizzes().first.then((quizzes) {
+    _firestore.getQuizzes().then((quizzes) {
       final matches = quizzes.where((q) =>
         q.title.toLowerCase().contains(lower) ||
         q.subject.toLowerCase().contains(lower)
@@ -46,10 +46,10 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
         'icon': Icons.quiz_rounded,
         'color': AppColors.physiologyBlue,
       }).toList();
-      setState(() => _results.addAll(matches));
+      if (mounted) setState(() => _results.addAll(matches));
     });
 
-    _firestore.getFlashcards().first.then((cards) {
+    _firestore.getFlashcards().then((cards) {
       final matches = cards.where((c) =>
         c.front.toLowerCase().contains(lower) ||
         c.back.toLowerCase().contains(lower) ||
@@ -62,27 +62,28 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
         'icon': Icons.credit_card_rounded,
         'color': AppColors.pharmacologyOrange,
       }).toList();
-      setState(() => _results.addAll(matches));
+      if (mounted) setState(() => _results.addAll(matches));
     });
 
-    _firestore.getSubjects().first.then((subjects) {
+    _firestore.getSubjects().then((subjects) {
       final matches = subjects.where((s) =>
         s.name.toLowerCase().contains(lower)
       ).map((s) => {
         'type': 'subject',
         'title': s.name,
-        'subtitle': 'Materia',
+        'subtitle': '',
+        'data': null,
         'icon': Icons.folder_rounded,
         'color': AppColors.primary,
       }).toList();
-      setState(() => _results.addAll(matches));
+      if (mounted) setState(() => _results.addAll(matches));
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _focusNode.requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
   }
 
   @override
@@ -96,154 +97,77 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.dark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildSearchBar(),
-            Expanded(child: _isSearching ? _buildResults() : _buildEmptyState()),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 2))],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: AppColors.lightText),
-            onPressed: () => Navigator.pop(context),
+      appBar: AppBar(
+        title: TextField(
+          controller: _searchController,
+          focusNode: _focusNode,
+          onChanged: _search,
+          style: const TextStyle(color: AppColors.lightText, fontSize: 16),
+          decoration: const InputDecoration(
+            hintText: 'Buscar quizzes, flashcards...',
+            hintStyle: TextStyle(color: AppColors.secondaryText),
+            border: InputBorder.none,
           ),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              focusNode: _focusNode,
-              style: const TextStyle(color: AppColors.lightText, fontSize: 16),
-              decoration: InputDecoration(
-                hintText: 'Buscar materias, quizzes, flashcards...',
-                hintStyle: const TextStyle(color: AppColors.secondaryText),
-                border: InputBorder.none,
-                fillColor: AppColors.dark,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, color: AppColors.secondaryText),
-                        onPressed: () {
-                          _searchController.clear();
-                          _search('');
-                        },
-                      )
-                    : null,
-              ),
-              onChanged: _search,
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: _isSearching
+          ? (_results.isEmpty
+              ? Center(
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.search_off_rounded, size: 80, color: AppColors.secondaryText.withValues(alpha: 0.5)),
+                    const SizedBox(height: 16),
+                    const Text('Sin resultados', style: TextStyle(fontSize: 18, color: AppColors.secondaryText)),
+                  ]),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _results.length,
+                  itemBuilder: (context, index) => _buildResultItem(_results[index]),
+                ))
+          : Center(
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.search_rounded, size: 100, color: AppColors.primary.withValues(alpha: 0.3)),
+                const SizedBox(height: 16),
+                const Text('Busca en todo tu contenido', style: TextStyle(fontSize: 18, color: AppColors.secondaryText)),
+                const SizedBox(height: 8),
+                const Text('Quizzes, flashcards, materias y más', style: TextStyle(color: AppColors.secondaryText)),
+              ]),
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildResults() {
-    if (_results.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off_rounded, size: 64, color: AppColors.secondaryText.withValues(alpha: 0.5)),
-            const SizedBox(height: 16),
-            const Text('Sin resultados', style: TextStyle(color: AppColors.secondaryText, fontSize: 18)),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _results.length,
-      itemBuilder: (context, index) {
-        final item = _results[index];
-        return _buildResultItem(item);
-      },
-    );
-  }
-
-  Widget _buildResultItem(Map<String, dynamic> item) {
-    final color = item['color'] as Color;
+  Widget _buildResultItem(Map<String, dynamic> result) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: AppColors.darkCard,
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        color: Colors.transparent,
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           onTap: () {
-            final type = item['type'] as String;
-            if (type == 'quiz') {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (_) => QuizPage(quiz: item['data'] as Quiz),
-              ));
-            } else if (type == 'flashcard') {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (_) => FlashcardPage(flashcards: [item['data'] as Flashcard], title: item['title'] as String),
-              ));
+            if (result['type'] == 'quiz') {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => QuizPage(quiz: result['data'] as Quiz)));
+            } else if (result['type'] == 'flashcard') {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => FlashcardPage(flashcards: [result['data'] as Flashcard], title: 'Flashcard')));
             }
           },
-          child: Padding(
+          child: Container(
             padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: color.withValues(alpha: 0.15),
-                  ),
-                  child: Icon(item['icon'] as IconData, color: color, size: 22),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item['title'] as String, style: const TextStyle(color: AppColors.lightText, fontSize: 14, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text(item['subtitle'] as String, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.15),
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  ),
-                  child: Text(item['type'] as String, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: AppColors.border.withValues(alpha: 0.3))),
+            child: Row(children: [
+              Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: (result['color'] as Color).withValues(alpha: 0.15)),
+                child: Icon(result['icon'] as IconData, color: result['color'] as Color, size: 20)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(result['title'] as String, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 14)),
+                if ((result['subtitle'] as String).isNotEmpty)
+                  Text(result['subtitle'] as String, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
+              ])),
+              Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText.withValues(alpha: 0.5)),
+            ]),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_rounded, size: 80, color: AppColors.primary.withValues(alpha: 0.3)),
-          const SizedBox(height: 16),
-          const Text('Buscar en todo el contenido', style: TextStyle(color: AppColors.secondaryText, fontSize: 16)),
-          const SizedBox(height: 8),
-          const Text('Materias • Quizzes • Flashcards', style: TextStyle(color: AppColors.secondaryText, fontSize: 13)),
-        ],
       ),
     );
   }
