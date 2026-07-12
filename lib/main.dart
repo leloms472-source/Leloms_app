@@ -99,7 +99,7 @@ class LelomsApp extends StatelessWidget {
         color: AppColors.darkCard,
         elevation: 2,
         shadowColor: AppColors.overlay.withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -125,7 +125,7 @@ class LelomsApp extends StatelessWidget {
         filled: true,
         fillColor: AppColors.darkCard,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -158,13 +158,13 @@ ThemeData _buildLightTheme() {
       elevation: 0,
       centerTitle: false,
       titleTextStyle: AppTypography.titleLarge,
-      iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
+      iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
     ),
     cardTheme: CardThemeData(
       color: AppColors.lightCard,
       elevation: 2,
       shadowColor: AppColors.overlay.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -190,7 +190,7 @@ ThemeData _buildLightTheme() {
       filled: true,
       fillColor: AppColors.lightCard,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         borderSide: const BorderSide(color: AppColors.lightBorder),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -240,7 +240,7 @@ class _AchievementListenerState extends State<_AchievementListener> {
             ]),
             backgroundColor: AppColors.darkCard,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
             duration: const Duration(seconds: 3),
           ),
         );

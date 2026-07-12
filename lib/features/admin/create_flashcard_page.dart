@@ -13,7 +13,7 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
   final _frontCtrl = TextEditingController();
   final _backCtrl = TextEditingController();
   String _selectedSubject = 'Anatomía';
-  final List<String> _subjects = [
+  final List<String> _subjects = const [
     'Anatomía', 'Fisiología', 'Bioquímica', 'Farmacología', 'Histología', 'Patología',
   ];
   bool _saving = false;

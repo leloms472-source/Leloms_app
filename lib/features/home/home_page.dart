@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   width: 60, height: 60,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
@@ -164,8 +164,8 @@ class _HomePageState extends State<HomePage> {
 
   String get _formattedDate {
     final now = DateTime.now();
-    final months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    final days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     return '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
   }
 
@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 15, spreadRadius: 2)],
       ),
       child: Column(
@@ -214,7 +214,7 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
+                       borderRadius: const BorderRadius.all(Radius.circular(20)),
                     ),
                     child: Text('Nv. ${user.level}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                   ),
@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
             child: LinearProgressIndicator(
               value: user.xpProgress,
               backgroundColor: Colors.white.withValues(alpha: 0.2),
@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(
           color: AppColors.darkCard,
-          borderRadius: BorderRadius.circular(14),
+           borderRadius: const BorderRadius.all(Radius.circular(14)),
           border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
@@ -326,7 +326,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.darkCard,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
             border: Border.all(
               color: total > 0 ? AppColors.pharmacologyOrange.withValues(alpha: 0.3) : AppColors.success.withValues(alpha: 0.2),
             ),
@@ -368,7 +368,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.pharmacologyOrange.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                   ),
                   child: Text('$total', style: const TextStyle(color: AppColors.pharmacologyOrange, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
@@ -386,7 +386,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(
           color: challenges.allCompleted
               ? AppColors.success.withValues(alpha: 0.3)
@@ -402,7 +402,7 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: AppColors.gold.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: const Icon(Icons.emoji_events_rounded, color: AppColors.gold, size: 18),
               ),
@@ -418,7 +418,7 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: c.isCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
               border: Border.all(color: c.isCompleted ? AppColors.success.withValues(alpha: 0.2) : AppColors.border.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -480,9 +480,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildTodayStudy(StudyProvider study) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

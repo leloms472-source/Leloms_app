@@ -122,7 +122,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               width: _currentPage == i ? 24 : 8,
               height: 8,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
                 color: _currentPage == i ? AppColors.primary : AppColors.border,
               ),
             )),
@@ -140,7 +140,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(12))),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
               ),
               child: Text(_currentPage < _steps.length - 1 ? 'Siguiente' : 'Comenzar'),

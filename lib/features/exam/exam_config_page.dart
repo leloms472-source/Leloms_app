@@ -58,7 +58,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -109,7 +109,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: selected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.darkCard,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
                   border: Border.all(
                     color: selected ? AppColors.primary : AppColors.border,
                     width: selected ? 1.5 : 1,
@@ -120,7 +120,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
                   children: [
                     if (selected)
                       const Padding(
-                        padding: EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.only(right: 6),
                         child: Icon(Icons.check_rounded, color: AppColors.primary, size: 16),
                       ),
                     Text(subject, style: TextStyle(color: selected ? AppColors.primary : AppColors.lightText, fontWeight: selected ? FontWeight.bold : FontWeight.normal, fontSize: 13)),
@@ -137,7 +137,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
   Widget _buildSliderConfig(String label, int value, int min, int max, int divisions, ValueChanged<int> onChanged) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -173,7 +173,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
@@ -222,7 +222,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
           backgroundColor: AppColors.error,
           foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.border,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(16))),
         ),
       ),
     );

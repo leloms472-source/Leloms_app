@@ -142,7 +142,7 @@ class _FlashcardPageState extends State<FlashcardPage>
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.darkCard,
-              borderRadius: BorderRadius.circular(8),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             child: Text(
               '$_learnedCount ✅',
@@ -241,7 +241,7 @@ class _FlashcardPageState extends State<FlashcardPage>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: const BorderRadius.all(Radius.circular(24)),
             border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
             boxShadow: [
               BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 20, spreadRadius: 2),
@@ -254,7 +254,7 @@ class _FlashcardPageState extends State<FlashcardPage>
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold)),
               ),

@@ -64,7 +64,7 @@ class _CommunityPageState extends State<CommunityPage> {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.darkCard,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         ),
         child: TextField(
@@ -91,7 +91,7 @@ class _CommunityPageState extends State<CommunityPage> {
   Widget _buildTabs() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Row(
         children: [
           _buildTab('ranking', 'Ranking'),
@@ -110,7 +110,7 @@ class _CommunityPageState extends State<CommunityPage> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
           child: Text(label, textAlign: TextAlign.center, style: TextStyle(color: selected ? Colors.white : AppColors.secondaryText, fontWeight: FontWeight.bold, fontSize: 12)),
         ),
@@ -132,7 +132,7 @@ class _CommunityPageState extends State<CommunityPage> {
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(8))),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -155,7 +155,7 @@ class _CommunityPageState extends State<CommunityPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [AppColors.gold, AppColors.pharmacologyOrange], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         boxShadow: [BoxShadow(color: AppColors.gold.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 2)],
       ),
       child: Column(
@@ -199,14 +199,14 @@ class _CommunityPageState extends State<CommunityPage> {
 
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
+          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.2))),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
                 Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
                   child: const Icon(Icons.leaderboard_rounded, color: AppColors.gold, size: 18),
                 ),
                 const SizedBox(width: 8),
@@ -231,7 +231,7 @@ class _CommunityPageState extends State<CommunityPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
                     color: rank <= 3 ? rankColor.withValues(alpha: 0.05) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
                     border: rank <= 3 ? Border.all(color: rankColor.withValues(alpha: 0.2)) : null,
                   ),
                   child: Row(
@@ -284,7 +284,7 @@ class _CommunityPageState extends State<CommunityPage> {
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
+                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(4))),
                   child: Text(item['difficulty'] as String, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                 ),
               ]),
@@ -320,7 +320,7 @@ class _CommunityPageState extends State<CommunityPage> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: const BorderRadius.all(Radius.circular(8))),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 16, color: color),
           if (label.isNotEmpty) ...[const SizedBox(width: 4), Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600))],
@@ -335,7 +335,7 @@ class _CommunityPageState extends State<CommunityPage> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
+          decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: AppColors.primary.withValues(alpha: 0.3))),
           child: Row(children: [
             Container(
               width: 50, height: 50,
@@ -345,7 +345,7 @@ class _CommunityPageState extends State<CommunityPage> {
             const SizedBox(width: 12),
             const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('Tus Estadísticas', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text('2 resúmenes • 73 votos totales', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
             ])),
           ]),
@@ -371,7 +371,7 @@ class _CommunityPageState extends State<CommunityPage> {
         Row(children: [
           Container(
             width: 40, height: 40,
-            decoration: BoxDecoration(color: (item['color'] as Color).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: (item['color'] as Color).withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
             child: Icon(Icons.description_rounded, color: item['color'] as Color, size: 22),
           ),
           const SizedBox(width: 12),

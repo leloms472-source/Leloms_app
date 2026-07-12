@@ -68,13 +68,13 @@ class _CalendarPageState extends State<CalendarPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [AppColors.error, AppColors.tertiary], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         boxShadow: [BoxShadow(color: AppColors.error.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 2)],
       ),
       child: Row(children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+          decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
           child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 28),
         ),
         const SizedBox(width: 16),
@@ -92,7 +92,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget _buildViewToggle() {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Row(children: [
         _buildToggleOption('Semana', _isWeeklyView, () => setState(() => _isWeeklyView = true)),
         _buildToggleOption('Mes', !_isWeeklyView, () => setState(() => _isWeeklyView = false)),
@@ -106,7 +106,7 @@ class _CalendarPageState extends State<CalendarPage> {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(color: isActive ? AppColors.primary : Colors.transparent, borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(color: isActive ? AppColors.primary : Colors.transparent, borderRadius: const BorderRadius.all(Radius.circular(8))),
           child: Text(label, textAlign: TextAlign.center, style: TextStyle(color: isActive ? Colors.white : AppColors.secondaryText, fontWeight: FontWeight.bold)),
         ),
       ),
@@ -121,7 +121,7 @@ class _CalendarPageState extends State<CalendarPage> {
       ]),
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.event_rounded, size: 16, color: AppColors.primary),
           SizedBox(width: 6),
@@ -141,7 +141,7 @@ class _CalendarPageState extends State<CalendarPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         border: Border(left: BorderSide(color: item['color'] as Color, width: 4)),
       ),
       child: Row(children: [
@@ -184,9 +184,9 @@ class _CalendarPageState extends State<CalendarPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(10)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Row(children: [
-        Container(width: 8, height: 40, decoration: BoxDecoration(color: event['color'] as Color, borderRadius: BorderRadius.circular(4))),
+        Container(width: 8, height: 40, decoration: BoxDecoration(color: event['color'] as Color, borderRadius: const BorderRadius.all(Radius.circular(4)))),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(event['title'] as String, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.lightText)),
@@ -194,7 +194,7 @@ class _CalendarPageState extends State<CalendarPage> {
         ])),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(color: (event['color'] as Color).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(6)),
+          decoration: BoxDecoration(color: (event['color'] as Color).withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(6))),
           child: Text(event['type'] as String, style: TextStyle(color: event['color'] as Color, fontSize: 10, fontWeight: FontWeight.bold)),
         ),
       ]),

@@ -68,7 +68,7 @@ class _LibraryPageState extends State<LibraryPage> {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.darkCard,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
         ),
         child: TextField(
@@ -95,7 +95,7 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget _buildTabs() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Row(
         children: [
           _buildTab('subjects', 'Mis Materias'),
@@ -115,7 +115,7 @@ class _LibraryPageState extends State<LibraryPage> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
           child: Text(label, textAlign: TextAlign.center, style: TextStyle(
             color: isSelected ? Colors.white : AppColors.secondaryText,
@@ -161,7 +161,7 @@ class _LibraryPageState extends State<LibraryPage> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
             boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 15, spreadRadius: 2)],
           ),
           child: Column(
@@ -188,7 +188,7 @@ class _LibraryPageState extends State<LibraryPage> {
               if (subjects.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
                   child: LinearProgressIndicator(
                   value: subjects.where((s) {
                     final data = s.data() as Map<String, dynamic>? ?? {};
@@ -237,14 +237,14 @@ class _LibraryPageState extends State<LibraryPage> {
   Widget _buildResourceType(IconData icon, String label, String count, Color color, VoidCallback? onTap) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.darkCard,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: const BorderRadius.all(Radius.circular(16)),
             border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
           child: Column(
@@ -284,7 +284,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))),
                   child: const Text('LIVE', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -293,7 +293,7 @@ class _LibraryPageState extends State<LibraryPage> {
             if (subjects.isEmpty)
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
                 child: const Text('Agrega materias desde Firebase Console', style: TextStyle(color: AppColors.secondaryText)),
               )
             else
@@ -302,7 +302,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
                   child: Row(
                     children: [
                       Container(

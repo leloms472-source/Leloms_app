@@ -197,11 +197,11 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
               context: context,
               builder: (ctx) => AlertDialog(
                 backgroundColor: AppColors.darkCard,
-                title: const Text('¿Salir del simulacro?', style: TextStyle(color: AppColors.lightText)),
-                content: const Text('Perderás todo el progreso', style: TextStyle(color: AppColors.secondaryText)),
+                title: const Text('¿Salir del simulacro?', style: const TextStyle(color: AppColors.lightText)),
+                content: const Text('Perderás todo el progreso', style: const TextStyle(color: AppColors.secondaryText)),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Continuar', style: TextStyle(color: AppColors.primary))),
-                  TextButton(onPressed: () { Navigator.pop(ctx); Navigator.pop(context); }, child: const Text('Salir', style: TextStyle(color: AppColors.error))),
+                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Continuar', style: const TextStyle(color: AppColors.primary))),
+                  TextButton(onPressed: () { Navigator.pop(ctx); Navigator.pop(context); }, child: const Text('Salir', style: const TextStyle(color: AppColors.error))),
                 ],
               ),
             );
@@ -217,7 +217,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
                   color: isLowTime
                       ? AppColors.error.withValues(alpha: 0.2 + (_warningAnim.value * 0.2))
                       : AppColors.darkCard,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: Text(
                   _formattedTime,
@@ -256,7 +256,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.info.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
                     ),
                     child: Text(
                       question.subject,
@@ -310,7 +310,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           border: Border.all(color: borderColor.withValues(alpha: 0.5)),
         ),
         child: Row(
@@ -358,7 +358,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
               width: isActive ? 12 : 8,
               height: 8,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: const BorderRadius.all(Radius.circular(4)),
                 color: isActive ? AppColors.primary : (isDone ? AppColors.success : AppColors.border),
               ),
             );
@@ -409,9 +409,9 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                 ),
-                child: const Text('Finalizar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: const Text('Finalizar', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
             const SizedBox(height: 32),
@@ -452,7 +452,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
     final xpGained = correct * 10;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -478,7 +478,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
   Widget _buildSubjectBreakdown(Map<String, int> subjectCorrect, Map<String, int> subjectTotal) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -506,7 +506,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 6),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: const BorderRadius.all(Radius.circular(4)),
                     child: LinearProgressIndicator(
                       value: pct,
                       backgroundColor: AppColors.border,
@@ -528,7 +528,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
   Widget _buildAnswerReview() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

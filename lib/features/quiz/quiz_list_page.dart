@@ -70,9 +70,9 @@ class QuizListPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: Material(
                   color: AppColors.darkCard,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -126,7 +126,7 @@ class QuizListPage extends StatelessWidget {
                                 horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
+                               borderRadius: const BorderRadius.all(Radius.circular(8)),
                             ),
                             child: Text(
                               '${quiz.timeMinutes}min',

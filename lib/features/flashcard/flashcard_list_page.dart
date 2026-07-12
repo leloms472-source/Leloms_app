@@ -69,9 +69,9 @@ class FlashcardListPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: Material(
                   color: AppColors.darkCard,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
                     onTap: () {
                       // Group flashcards by subject and start session
                       Navigator.push(
@@ -134,7 +134,7 @@ class FlashcardListPage extends StatelessWidget {
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors.success.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
+                                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                               ),
                               child: const Text(
                                 '✅',

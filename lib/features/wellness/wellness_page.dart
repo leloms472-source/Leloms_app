@@ -128,7 +128,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [AppColors.primary, AppColors.primaryLight], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 15, spreadRadius: 2)],
       ),
       child: const Row(children: [
@@ -148,7 +148,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(children: [
@@ -190,7 +190,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
   Widget _buildMoodSelector() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Row(children: [Icon(Icons.mood_rounded, color: AppColors.gold), SizedBox(width: 8), Text('¿Cómo te sientes hoy?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText))]),
         const SizedBox(height: 20),
@@ -205,7 +205,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected ? mood['color'] as Color : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 border: Border.all(color: isSelected ? Colors.white : mood['color'] as Color, width: 2),
               ),
               child: Column(children: [
@@ -225,7 +225,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [AppColors.gold.withValues(alpha: 0.2), AppColors.gold.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -245,7 +245,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
   Widget _buildStatsCard() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Row(children: [Icon(Icons.analytics_rounded, color: AppColors.success), SizedBox(width: 8), Text('Tu progreso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText))]),
         const SizedBox(height: 16),
@@ -290,7 +290,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
 
   Widget _buildQuickAction(IconData icon, String label, Color color) {
     return Container(
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: color.withValues(alpha: 0.3))),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12)), border: Border.all(color: color.withValues(alpha: 0.3))),
       child: InkWell(
         onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$label - Próximamente'))),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -305,7 +305,7 @@ class _WellnessPageState extends State<WellnessPage> with SingleTickerProviderSt
   Widget _buildCheckIn() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(16))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Row(children: [Icon(Icons.check_circle_outline_rounded, color: AppColors.success), SizedBox(width: 8), Text('Check-in rápido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText))]),
         const SizedBox(height: 20),

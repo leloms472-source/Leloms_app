@@ -129,7 +129,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(12))),
             ),
           ),
         ],
@@ -147,7 +147,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [AppColors.primary.withValues(alpha: 0.15), AppColors.secondary.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
               border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
             ),
             child: Column(
@@ -165,7 +165,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                     hintStyle: const TextStyle(color: AppColors.secondaryText),
                     filled: true,
                     fillColor: AppColors.darkCard,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: const OutlineInputBorder(borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -182,7 +182,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(12))),
                     child: Row(
                       children: [
                         const Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
@@ -202,7 +202,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                     labelStyle: const TextStyle(color: AppColors.secondaryText),
                     filled: true,
                     fillColor: AppColors.darkCard,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: const OutlineInputBorder(borderSide: BorderSide.none),
                   ),
                 ),
               ],
@@ -225,7 +225,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: selected ? AppColors.primary.withValues(alpha: 0.2) : AppColors.darkCard,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
                     border: Border.all(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.5 : 1),
                   ),
                   child: Row(
@@ -251,7 +251,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 disabledBackgroundColor: AppColors.border,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(12))),
               ),
             ),
           ),
@@ -277,7 +277,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: [AppColors.success.withValues(alpha: 0.15), AppColors.primary.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
               border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -324,7 +324,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.darkCard,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: const BorderRadius.all(Radius.circular(16)),
                 border: Border.all(color: todayPlan.isComplete ? AppColors.success.withValues(alpha: 0.3) : AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Column(
@@ -394,7 +394,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: AppColors.darkCard,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
                 border: Border.all(color: day.isComplete ? AppColors.success.withValues(alpha: 0.2) : AppColors.border),
               ),
               child: Row(
@@ -439,7 +439,7 @@ class _StudyPlanPageState extends State<StudyPlanPage> {
                 foregroundColor: AppColors.error,
                 side: const BorderSide(color: AppColors.error),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(12))),
               ),
             ),
           ),

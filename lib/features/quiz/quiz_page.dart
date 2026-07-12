@@ -119,7 +119,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: _secondsRemaining < 60 ? AppColors.error.withValues(alpha: 0.2) : AppColors.darkCard,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             child: Text(
               _formattedTime,
@@ -171,7 +171,7 @@ class _QuizPageState extends State<QuizPage> {
                         color: _selectedAnswer == question.correctIndex
                             ? AppColors.success.withValues(alpha: 0.1)
                             : AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
                         border: Border.all(
                           color: _selectedAnswer == question.correctIndex
                               ? AppColors.success.withValues(alpha: 0.3)
@@ -328,8 +328,8 @@ class _QuizPageState extends State<QuizPage> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               disabledBackgroundColor: AppColors.border,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                      shape: RoundedRectangleBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
             ),
             child: Text(
@@ -447,10 +447,10 @@ class _QuizPageState extends State<QuizPage> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
                   ),
-                  child: const Text(
+                ),
+                child: const Text(
                     'Volver',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),

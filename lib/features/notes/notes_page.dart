@@ -93,7 +93,7 @@ class _NotesPageState extends State<NotesPage> {
                     hintStyle: TextStyle(color: AppColors.secondaryText.withValues(alpha: 0.5)),
                     filled: true,
                     fillColor: AppColors.darkCard,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: const OutlineInputBorder(borderSide: BorderSide.none),
                     contentPadding: const EdgeInsets.all(16),
                   ),
                 ),
@@ -105,7 +105,7 @@ class _NotesPageState extends State<NotesPage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.darkCard,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
                   ),
                   child: SingleChildScrollView(
                     child: _savedNote.isEmpty

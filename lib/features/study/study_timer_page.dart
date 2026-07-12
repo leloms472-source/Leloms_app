@@ -217,11 +217,11 @@ class _StudyTimerPageState extends State<StudyTimerPage>
   Widget _buildModeSelector() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
+        decoration: BoxDecoration(
+          color: AppColors.darkCard,
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
+        ),
+        child: Row(
         children: _modes.keys.map((mode) {
           final isSelected = _selectedMode == mode;
           return Expanded(
@@ -231,7 +231,7 @@ class _StudyTimerPageState extends State<StudyTimerPage>
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
                 ),
                 child: Text(
                   mode,
@@ -348,7 +348,7 @@ class _StudyTimerPageState extends State<StudyTimerPage>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.darkCard,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
               ),
               child: Text(
                 '$_sessionCount sesiones completadas',
@@ -391,7 +391,7 @@ class _StudyTimerPageState extends State<StudyTimerPage>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(

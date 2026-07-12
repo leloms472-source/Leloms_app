@@ -1,6 +1,6 @@
 {
-    "name": "leloms_app",
-    "short_name": "leloms_app",
+    "name": "LELOMS - Guía del Estudiante",
+    "short_name": "LELOMS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

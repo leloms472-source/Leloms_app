@@ -94,9 +94,9 @@ class ReviewQueuePage extends StatelessWidget {
   }) {
     return Material(
       color: AppColors.darkCard,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+      borderRadius: const BorderRadius.all(Radius.circular(16)),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(20),

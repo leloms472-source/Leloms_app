@@ -24,7 +24,7 @@ class ShopPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -50,7 +50,7 @@ class ShopPage extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
               border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -89,8 +89,8 @@ class ShopPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: AppColors.pharmacologyOrange.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.pharmacologyOrange.withValues(alpha: 0.3)),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        border: Border.all(color: AppColors.pharmacologyOrange.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -107,8 +107,8 @@ class ShopPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           color: AppColors.info.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -125,7 +125,7 @@ class ShopPage extends StatelessWidget {
               ),
             ),
           const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text('Objetos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
           ),
           Expanded(
@@ -153,16 +153,16 @@ class ShopPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         border: Border.all(
           color: item.isOwned ? item.color.withValues(alpha: 0.4) : AppColors.border.withValues(alpha: 0.3),
         ),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
           onTap: () {
             if (item.isOwned) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -197,7 +197,7 @@ class ShopPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.success.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: const BorderRadius.all(Radius.circular(8)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -243,7 +243,7 @@ class ShopPage extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.darkCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: const BorderRadius.all(Radius.circular(20))),
         title: Row(
           children: [
             Container(

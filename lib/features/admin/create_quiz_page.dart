@@ -17,7 +17,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   String _selectedSubject = 'Anatomía';
   String _selectedDifficulty = 'Intermedio';
   final List<_QuestionForm> _questions = [_QuestionForm()];
-  final List<String> _subjects = [
+  final List<String> _subjects = const [
     'Anatomía', 'Fisiología', 'Bioquímica', 'Farmacología', 'Histología', 'Patología',
   ];
   bool _saving = false;
@@ -144,7 +144,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
                   dropdownColor: AppColors.darkCard,
                   style: const TextStyle(color: AppColors.lightText),
                   decoration: const InputDecoration(labelText: 'Dificultad', labelStyle: TextStyle(color: AppColors.secondaryText)),
-                  items: ['Básico', 'Intermedio', 'Avanzado'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  items: const ['Básico', 'Intermedio', 'Avanzado'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                   onChanged: (v) => setState(() => _selectedDifficulty = v ?? _selectedDifficulty),
                 ),
                 const SizedBox(height: 12),
@@ -222,7 +222,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   }
 
   Widget _buildOptionField(_QuestionForm q, int index) {
-    final letters = ['A', 'B', 'C', 'D'];
+    final letters = const ['A', 'B', 'C', 'D'];
     final isCorrect = q.correctIndex == index;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

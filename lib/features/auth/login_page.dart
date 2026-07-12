@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../home/home_page.dart';
+import '../../widgets/loading_overlay.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -218,7 +219,7 @@ class _LoginPageState extends State<LoginPage>
               ),
             ),
           ),
-          if (_isLoading) _buildLoadingOverlay(),
+          if (_isLoading) const LoadingOverlay(message: 'Conectando...'),
         ],
       ),
     );
@@ -276,44 +277,40 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildFlipCard() {
-    return GestureDetector(
-      onTap: () {},
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        height: 380,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            AnimatedBuilder(
-              animation: _flipController,
-              builder: (context, child) {
-                return Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateY(_frontRotation.value),
-                  alignment: FractionalOffset.center,
-                  child: _flipController.value < 0.5
-                      ? _buildLoginCard()
-                      : Opacity(opacity: 0, child: _buildLoginCard()),
-                );
-              },
-            ),
-            AnimatedBuilder(
-              animation: _flipController,
-              builder: (context, child) {
-                return Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateY(_backRotation.value),
-                  alignment: FractionalOffset.center,
-                  child: _flipController.value >= 0.5
-                      ? _buildRegisterCard()
-                      : Opacity(opacity: 0, child: _buildRegisterCard()),
-                );
-              },
-            ),
-          ],
-        ),
+    return SizedBox(
+      height: 380,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _flipController,
+            builder: (context, child) {
+              return Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(_frontRotation.value),
+                alignment: FractionalOffset.center,
+                child: _flipController.value < 0.5
+                    ? _buildLoginCard()
+                    : Opacity(opacity: 0, child: _buildLoginCard()),
+              );
+            },
+          ),
+          AnimatedBuilder(
+            animation: _flipController,
+            builder: (context, child) {
+              return Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(_backRotation.value),
+                alignment: FractionalOffset.center,
+                child: _flipController.value >= 0.5
+                    ? _buildRegisterCard()
+                    : Opacity(opacity: 0, child: _buildRegisterCard()),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -639,29 +636,4 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  Widget _buildLoadingOverlay() {
-    return Container(
-      color: AppColors.overlay.withValues(alpha: 0.6),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppColors.darkCard,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: AppColors.primary),
-              SizedBox(height: 16),
-              Text(
-                'Conectando...',
-                style: TextStyle(color: AppColors.lightText),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -180,9 +180,9 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           onTap: () {
             final type = item['type'] as String;
             if (type == 'quiz') {
@@ -221,7 +221,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: const BorderRadius.all(Radius.circular(6)),
                   ),
                   child: Text(item['type'] as String, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
                 ),

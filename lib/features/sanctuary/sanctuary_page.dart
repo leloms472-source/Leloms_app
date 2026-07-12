@@ -196,7 +196,7 @@ class _SanctuaryPageState extends State<SanctuaryPage>
                   const SizedBox(height: 4),
                   Text(
                     sanctuary.treeStageName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -219,7 +219,7 @@ class _SanctuaryPageState extends State<SanctuaryPage>
       child: Column(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: const BorderRadius.all(Radius.circular(6)),
             child: LinearProgressIndicator(
               value: sanctuary.treeProgress,
               backgroundColor: AppColors.darkCard,
@@ -449,7 +449,7 @@ class _SanctuaryPageState extends State<SanctuaryPage>
                 .map((s) => Container(
                       decoration: BoxDecoration(
                         color: AppColors.darkCard,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -499,7 +499,6 @@ class _TreePainter extends CustomPainter {
     final centerX = size.width / 2;
     final groundY = size.height - 10;
 
-    // Ground
     final groundPaint = Paint()
       ..color = AppColors.darkCard
       ..style = PaintingStyle.fill;
@@ -551,8 +550,6 @@ class _TreePainter extends CustomPainter {
     canvas.drawPath(path, trunkPaint);
 
     if (stage.index >= TreeStage.young.index) {
-      // Branches
-      // Left branch
       canvas.drawLine(
         Offset(x - trunkWidth / 4, groundY - trunkHeight * 0.6),
         Offset(x - trunkWidth * 1.2, groundY - trunkHeight * 0.7),
@@ -561,7 +558,6 @@ class _TreePainter extends CustomPainter {
           ..strokeWidth = 4
           ..style = PaintingStyle.stroke,
       );
-      // Right branch
       canvas.drawLine(
         Offset(x + trunkWidth / 4, groundY - trunkHeight * 0.5),
         Offset(x + trunkWidth * 1.2, groundY - trunkHeight * 0.6),
@@ -585,7 +581,6 @@ class _TreePainter extends CustomPainter {
     final topY = groundY - trunkHeight;
 
     if (stage == TreeStage.sprout) {
-      // Simple leaves
       final path = Path()
         ..moveTo(x, topY - foliageSize)
         ..quadraticBezierTo(
@@ -594,11 +589,9 @@ class _TreePainter extends CustomPainter {
             x + foliageSize / 2, topY - foliageSize / 3, x, topY - foliageSize);
       canvas.drawPath(path, leafPaint);
     } else {
-      // Full foliage circle
       canvas.drawCircle(Offset(x, topY - foliageSize / 2), foliageSize / 2, leafPaint);
 
       if (stage.index >= TreeStage.young.index) {
-        // Additional foliage for larger trees
         canvas.drawCircle(
             Offset(x - foliageSize / 2, topY - foliageSize / 4),
             foliageSize / 3,
@@ -610,7 +603,6 @@ class _TreePainter extends CustomPainter {
       }
 
       if (stage == TreeStage.ancient) {
-        // Golden glow for ancient tree
         final glowPaint = Paint()
           ..color = AppColors.gold.withValues(alpha: 0.15)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);

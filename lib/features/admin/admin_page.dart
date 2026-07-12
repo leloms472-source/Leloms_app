@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme/app_colors.dart';
 import 'create_quiz_page.dart';
 import 'create_flashcard_page.dart';
+import '../../widgets/menu_card.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -21,31 +22,28 @@ class AdminPage extends StatelessWidget {
         children: [
           _buildHeader(),
           const SizedBox(height: 20),
-          _buildMenuCard(
-            context,
-            Icons.quiz_rounded,
-            'Crear Quiz',
-            'Añade preguntas de opción múltiple con respuestas y explicaciones',
-            AppColors.primary,
-            () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateQuizPage())),
+          MenuCard(
+            icon: Icons.quiz_rounded,
+            title: 'Crear Quiz',
+            description: 'Añade preguntas de opción múltiple con respuestas y explicaciones',
+            color: AppColors.primary,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateQuizPage())),
           ),
           const SizedBox(height: 12),
-          _buildMenuCard(
-            context,
-            Icons.credit_card_rounded,
-            'Crear Flashcard',
-            'Añade tarjetas de estudio con anverso y reverso',
-            AppColors.secondary,
-            () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateFlashcardPage())),
+          MenuCard(
+            icon: Icons.credit_card_rounded,
+            title: 'Crear Flashcard',
+            description: 'Añade tarjetas de estudio con anverso y reverso',
+            color: AppColors.secondary,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateFlashcardPage())),
           ),
           const SizedBox(height: 12),
-          _buildMenuCard(
-            context,
-            Icons.book_rounded,
-            'Gestionar Asignaturas',
-            'Añade o edita las asignaturas disponibles',
-            AppColors.success,
-            () => _showCreateSubjectDialog(context),
+          MenuCard(
+            icon: Icons.book_rounded,
+            title: 'Gestionar Asignaturas',
+            description: 'Añade o edita las asignaturas disponibles',
+            color: AppColors.success,
+            onTap: () => _showCreateSubjectDialog(context),
           ),
           const SizedBox(height: 12),
           _buildContentStats(context),
@@ -84,48 +82,6 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(BuildContext context, IconData icon, String title, String description, Color color, VoidCallback onTap) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 48, height: 48,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.15)),
-                  child: Icon(icon, color: color, size: 22),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.bold, fontSize: 15)),
-                      const SizedBox(height: 2),
-                      Text(description, style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText, size: 22),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildContentStats(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('quizzes').snapshots(),
@@ -143,9 +99,9 @@ class AdminPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStat(Icons.quiz_rounded, '$quizCount', 'Quizzes', AppColors.primary),
-                  Container(width: 1, height: 40, color: AppColors.border),
+                  const Container(width: 1, height: 40, color: AppColors.border),
                   _buildStat(Icons.credit_card_rounded, '$cardCount', 'Flashcards', AppColors.secondary),
-                  Container(width: 1, height: 40, color: AppColors.border),
+                  const Container(width: 1, height: 40, color: AppColors.border),
                   _buildStat(Icons.book_rounded, '${quizCount + cardCount}', 'Total', AppColors.success),
                 ],
               ),
