@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/responsive.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/study_provider.dart';
+import '../../widgets/leloms_cat.dart';
 import '../ia/ia_page.dart';
 import '../ia/community_page.dart';
 import '../library/library_page.dart';
@@ -17,6 +18,9 @@ import '../search/global_search_page.dart';
 import '../study_plan/study_plan_page.dart';
 import '../auth/login_page.dart';
 import '../../core/supabase/supabase_client.dart';
+import '../career/career_list_page.dart';
+import '../topic/no_entiendo_page.dart';
+import '../topic/quick_study_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +31,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  static const _studyTips = [
+    '¿Sabías que estudiar en sesiones de 25 min mejora la retención?',
+    'Explicar un tema a otro refuerza tu aprendizaje.',
+    'Alterna materias para mantener tu mente activa.',
+    'Los descansos cortos ayudan a consolidar la memoria.',
+    'Dibujar diagramas mejora la comprensión de procesos.',
+  ];
+
+  String get _randomTip => _studyTips[DateTime.now().day % _studyTips.length];
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<ProfileProvider>();
@@ -51,14 +66,16 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(user),
-            SizedBox(height: Responsive.isMobile(context) ? 20 : 28),
-            _buildLiveStats(user),
-            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
+            const SizedBox(height: 16),
+            LelomsCatBanner(message: _randomTip),
+            const SizedBox(height: 24),
+            _buildRecommendation(user),
+            const SizedBox(height: 24),
             _buildQuickActions(context),
-            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
-            _buildDueReviews(),
-            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
-            _buildTodayStudy(study),
+            const SizedBox(height: 24),
+            _buildTodayStats(study),
+            const SizedBox(height: 24),
+            _buildQuickAccess(),
             const SizedBox(height: 32),
           ],
         ),
@@ -85,9 +102,11 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 12),
               Text(user.userName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-              Text('Nivel ${user.level} • ${user.currentXp} XP', style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              Text('${user.currentXp} XP', style: const TextStyle(color: Colors.white70, fontSize: 14)),
             ]),
           ),
+          _buildDrawerItem(Icons.home_rounded, 'Inicio', () => Navigator.pop(context)),
+          _buildDrawerItem(Icons.school_rounded, 'Carreras', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CareerListPage()))),
           _buildDrawerItem(Icons.checklist_rounded, 'Plan de Estudio', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyPlanPage()))),
           _buildDrawerItem(Icons.assignment_rounded, 'Simulacros', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
           _buildDrawerItem(Icons.show_chart_rounded, 'Progreso', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalyticsPage()))),
@@ -131,7 +150,11 @@ class _HomePageState extends State<HomePage> {
       children: [
         Container(
           width: 50, height: 50,
-          decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary]), border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2)),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(colors: [AppColors.primary, AppColors.secondary]),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
+          ),
           child: const Icon(Icons.person_rounded, size: 28, color: Colors.white),
         ),
         const SizedBox(width: 12),
@@ -150,96 +173,89 @@ class _HomePageState extends State<HomePage> {
     return '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
   }
 
-  Widget _buildLiveStats(ProfileProvider user) {
+  Widget _buildRecommendation(ProfileProvider user) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [AppColors.primary.withValues(alpha: 0.8), AppColors.primaryDark], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 15, spreadRadius: 2)],
       ),
-      child: Column(children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20), const SizedBox(width: 6), Text('Racha: ${user.streak} días', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))]),
-          ])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(20))), child: Text('Nv. ${user.level}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
-            const SizedBox(height: 8),
-            Text('${user.currentXp} / ${user.nextLevelXp} XP', style: const TextStyle(color: Colors.white70, fontSize: 11)),
-          ]),
+          const LelomsCat(message: '', size: 36),
+          const SizedBox(width: 10),
+          const Expanded(child: Text('¿Qué estudio hoy?', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
         ]),
         const SizedBox(height: 12),
-        ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          child: LinearProgressIndicator(
-            value: user.xpProgress,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-            minHeight: 8,
-          ),
-        ),
+        _recommendationChip(Icons.replay_rounded, 'Repasar temas pendientes', AppColors.pharmacologyOrange),
+        const SizedBox(height: 8),
+        _recommendationChip(Icons.timer_rounded, 'Sesión rápida de 10 min', AppColors.biochemistryGreen),
+        const SizedBox(height: 8),
+        _recommendationChip(Icons.smart_toy_rounded, 'Preguntar a IA Leloms', AppColors.primaryLight),
       ]),
+    );
+  }
+
+  Widget _recommendationChip(IconData icon, String label, Color color) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () {},
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+          child: Row(children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(color: Colors.white, fontSize: 13)),
+          ]),
+        ),
+      ),
     );
   }
 
   Widget _buildQuickActions(BuildContext context) {
     final quickItems = [
-      _QuickActionData(Icons.smart_toy_rounded, 'IA Leloms', AppColors.primary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IaPage()))),
-      _QuickActionData(Icons.assignment_rounded, 'Simulacro', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
-      _QuickActionData(Icons.timer_rounded, 'Pomodoro', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
-      _QuickActionData(Icons.groups_rounded, 'Comunidad', AppColors.secondary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage()))),
+      _QuickActionData(Icons.timer_outlined, '10 min', 'Estudio rápido', AppColors.biochemistryGreen, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickStudyPage(duration: 10)))),
+      _QuickActionData(Icons.timer_rounded, '1 hora', 'Estudio completo', AppColors.primary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QuickStudyPage(duration: 60)))),
+      _QuickActionData(Icons.smart_toy_rounded, 'IA Leloms', 'Pregunta lo que sea', AppColors.pharmacologyOrange, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IaPage()))),
+      _QuickActionData(Icons.help_outline_rounded, 'No entiendo', 'Explicación simple', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NoEntiendoPage()))),
     ];
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Acceso Rápido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+      const Text('Acción Rápida', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
       const SizedBox(height: 12),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: quickItems.map((item) => SizedBox(
-          width: Responsive.cardWidth(context),
-          child: _buildQuickCard(item.icon, item.label, item.color, item.onTap),
-        )).toList(),
-      ),
+      ...quickItems.map((item) => Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: item.onTap,
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: item.color.withValues(alpha: 0.2))),
+              child: Row(children: [
+                Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: item.color.withValues(alpha: 0.15)),
+                  child: Icon(item.icon, color: item.color, size: 20)),
+                const SizedBox(width: 12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(item.title, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text(item.subtitle, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
+                ])),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryText),
+              ]),
+            ),
+          ),
+        ),
+      )),
     ]);
   }
 
-  Widget _buildQuickCard(IconData icon, String label, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-        decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: const BorderRadius.all(Radius.circular(14)), border: Border.all(color: color.withValues(alpha: 0.2))),
-        child: Column(children: [
-          Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.15)), child: Icon(icon, color: color, size: 22)),
-          const SizedBox(height: 8),
-          Text(label, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 12)),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildDueReviews() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
-      ),
-      child: Row(children: [
-        Container(width: 48, height: 48, decoration: BoxDecoration(shape: BoxShape.circle, color: AppColors.success.withValues(alpha: 0.15)), child: const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 24)),
-        const SizedBox(width: 14),
-        const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Todo al día', style: TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 14)),
-          Text('Revisa tus flashcards en la biblioteca', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
-        ])),
-      ]),
-    );
-  }
-
-  Widget _buildTodayStudy(StudyProvider study) {
+  Widget _buildTodayStats(StudyProvider study) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.all(Radius.circular(16))),
@@ -247,22 +263,58 @@ class _HomePageState extends State<HomePage> {
         const Text('Estudio de Hoy', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
         const SizedBox(height: 16),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-          _buildTodayStat(Icons.access_time_rounded, '${study.totalMinutesToday}m', 'Tiempo', AppColors.info),
-          _buildTodayStat(Icons.repeat_rounded, '${study.sessionsToday}', 'Sesiones', AppColors.success),
-          _buildTodayStat(Icons.local_fire_department_rounded, '${study.currentStreakDays}d', 'Racha', AppColors.pharmacologyOrange),
-          _buildTodayStat(Icons.school_rounded, '${study.allTimeSessions}', 'Total', AppColors.primary),
+          _statItem(Icons.access_time_rounded, '${study.totalMinutesToday}m', 'Tiempo', AppColors.info),
+          _statItem(Icons.repeat_rounded, '${study.sessionsToday}', 'Sesiones', AppColors.success),
+          _statItem(Icons.local_fire_department_rounded, '${study.currentStreakDays}d', 'Racha', AppColors.pharmacologyOrange),
+          _statItem(Icons.school_rounded, '${study.allTimeSessions}', 'Total', AppColors.primary),
         ]),
       ]),
     );
   }
 
-  Widget _buildTodayStat(IconData icon, String value, String label, Color color) {
+  Widget _statItem(IconData icon, String value, String label, Color color) {
     return Column(children: [
       Icon(icon, color: color, size: 22),
       const SizedBox(height: 6),
       Text(value, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.bold, fontSize: 16)),
       Text(label, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
     ]);
+  }
+
+  Widget _buildQuickAccess() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Explorar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
+      const SizedBox(height: 12),
+      Row(children: [
+        _quickAccessCard(Icons.school_rounded, 'Carreras', AppColors.primary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CareerListPage()))),
+        const SizedBox(width: 8),
+        _quickAccessCard(Icons.groups_rounded, 'Comunidad', AppColors.secondary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage()))),
+        const SizedBox(width: 8),
+        _quickAccessCard(Icons.assignment_rounded, 'Simulacro', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
+      ]),
+    ]);
+  }
+
+  Widget _quickAccessCard(IconData icon, String label, Color color, VoidCallback onTap) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: 0.2))),
+            child: Column(children: [
+              Container(width: 44, height: 44, decoration: BoxDecoration(shape: BoxShape.circle, color: color.withValues(alpha: 0.15)), child: Icon(icon, color: color, size: 22)),
+              const SizedBox(height: 8),
+              Text(label, style: const TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 11)),
+            ]),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildBottomNav() {
@@ -286,10 +338,9 @@ class _HomePageState extends State<HomePage> {
 
 class _QuickActionData {
   final IconData icon;
-  final String label;
+  final String title;
+  final String subtitle;
   final Color color;
   final VoidCallback onTap;
-  const _QuickActionData(this.icon, this.label, this.color, this.onTap);
+  const _QuickActionData(this.icon, this.title, this.subtitle, this.color, this.onTap);
 }
-
-

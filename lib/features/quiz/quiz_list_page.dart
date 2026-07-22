@@ -5,7 +5,8 @@ import '../../services/supabase_service.dart';
 import 'quiz_page.dart';
 
 class QuizListPage extends StatelessWidget {
-  const QuizListPage({super.key});
+  final String? subject;
+  const QuizListPage({super.key, this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +15,12 @@ class QuizListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.dark,
       appBar: AppBar(
-        title: const Text('Quizzes'),
+        title: Text(subject != null ? 'Quizzes - $subject' : 'Quizzes'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: FutureBuilder<List<Quiz>>(
-        future: supabase.getQuizzes(),
+        future: supabase.getQuizzes(subject: subject),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: AppColors.primary));

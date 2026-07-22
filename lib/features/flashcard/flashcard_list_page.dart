@@ -6,7 +6,8 @@ import 'flashcard_page.dart';
 import 'review_queue_page.dart';
 
 class FlashcardListPage extends StatelessWidget {
-  const FlashcardListPage({super.key});
+  final String? subject;
+  const FlashcardListPage({super.key, this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class FlashcardListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.dark,
       appBar: AppBar(
-        title: const Text('Flashcards'),
+        title: Text(subject != null ? 'Flashcards - $subject' : 'Flashcards'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -26,7 +27,7 @@ class FlashcardListPage extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<List<Flashcard>>(
-        future: supabase.getFlashcards(),
+        future: supabase.getFlashcards(subject: subject),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: AppColors.primary));
