@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/responsive.dart';
 import '../../core/repositories/content_repository.dart';
 import '../../core/models/subject_model.dart';
 import '../quiz/quiz_list_page.dart';
@@ -18,7 +19,7 @@ class _LibraryPageState extends State<LibraryPage> {
   final ContentRepository _contentRepo = ContentRepository();
   String _searchQuery = '';
   String _selectedTab = 'subjects';
-  List<SubjectModel> _subjects = [];
+  List<Subject> _subjects = [];
   int _quizzesCount = 0;
   int _flashcardsCount = 0;
   bool _loading = true;
@@ -47,7 +48,7 @@ class _LibraryPageState extends State<LibraryPage> {
     }
   }
 
-  List<SubjectModel> get _filteredSubjects {
+  List<Subject> get _filteredSubjects {
     if (_searchQuery.isEmpty) return _subjects;
     return _subjects.where((s) => s.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
   }
@@ -191,7 +192,7 @@ class _LibraryPageState extends State<LibraryPage> {
       GridView.count(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 3,
+        crossAxisCount: Responsive.gridColumns(context),
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
         childAspectRatio: 1,

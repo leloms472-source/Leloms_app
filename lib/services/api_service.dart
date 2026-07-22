@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiException implements Exception {
@@ -17,6 +17,7 @@ class ApiService {
   static const _tokenKey = 'auth_token';
   static const _refreshTokenKey = 'refresh_token';
 
+  final http.Client _client = http.Client();
   Duration timeout = const Duration(seconds: 30);
   int maxRetries = 3;
 
@@ -76,21 +77,23 @@ class ApiService {
     int retryCount = 0,
   }) async {
     try {
-      final client = HttpClient()..connectionTimeout = timeout;
-
       final uri = Uri.parse('$baseUrl$path')
           .replace(queryParameters: queryParams);
-      final request = await client.openUrl(method, uri);
-
       final headers = await _buildHeaders();
-      headers.forEach((k, v) => request.headers.set(k, v));
 
-      if (body != null) {
-        request.add(utf8.encode(jsonEncode(body)));
+      http.Response response;
+      switch (method) {
+        case 'GET':
+          response = await _client.get(uri, headers: headers).timeout(timeout);
+        case 'POST':
+          response = await _client.post(uri, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(timeout);
+        case 'PUT':
+          response = await _client.put(uri, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(timeout);
+        case 'DELETE':
+          response = await _client.delete(uri, headers: headers).timeout(timeout);
+        default:
+          throw ApiException(0, 'Método no soportado: $method');
       }
-
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode == 401 && retryCount < 1) {
         await _tryRefreshToken();
@@ -98,12 +101,12 @@ class ApiService {
       }
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw ApiException(response.statusCode, responseBody);
+        throw ApiException(response.statusCode, response.body);
       }
 
-      if (responseBody.isEmpty) return {};
-      return jsonDecode(responseBody) as Map<String, dynamic>;
-    } on SocketException {
+      if (response.body.isEmpty) return {};
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } on Exception {
       if (retryCount < maxRetries) {
         await Future.delayed(Duration(seconds: 1 * (retryCount + 1)));
         return _request(method, path, body: body, retryCount: retryCount + 1);
@@ -117,15 +120,15 @@ class ApiService {
     if (refreshToken == null) return;
 
     try {
-      final client = HttpClient()..connectionTimeout = timeout;
-      final request = await client.postUrl(Uri.parse('$baseUrl/auth/refresh'));
-      request.headers.set('Content-Type', 'application/json');
-      request.add(utf8.encode(jsonEncode({'refreshToken': refreshToken})));
-      final response = await request.close();
-      final body = await response.transform(utf8.decoder).join();
+      final uri = Uri.parse('$baseUrl/auth/refresh');
+      final response = await _client.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refreshToken': refreshToken}),
+      ).timeout(timeout);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(body) as Map<String, dynamic>;
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
         await setTokens(
           data['token'] as String,
           data['refreshToken'] as String,

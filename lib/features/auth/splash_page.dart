@@ -3,11 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/profile_provider.dart';
-import '../../providers/sanctuary_provider.dart';
 import '../../providers/study_provider.dart';
-import '../../providers/achievement_provider.dart';
-import '../../providers/challenge_provider.dart';
-import '../../providers/shop_provider.dart';
 import 'login_page.dart';
 import '../home/home_page.dart';
 import '../onboarding/onboarding_page.dart';
@@ -90,11 +86,7 @@ class _SplashPageState extends State<SplashPage>
 
     if (hasProfile && mounted) {
       final uid = profileProvider.profile!.id;
-      context.read<SanctuaryProvider>().loadFromServer(uid);
       context.read<StudyProvider>().loadFromServer(uid);
-      context.read<AchievementProvider>().loadFromServer(uid);
-      context.read<ChallengeProvider>().loadFromServer(uid);
-      context.read<ShopProvider>().loadFromServer(uid);
     }
 
     if (!mounted) return;

@@ -47,7 +47,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
       return;
     }
 
-    final questionsData = <QuizQuestionModel>[];
+    final questionsData = <QuizQuestion>[];
     for (final q in _questions) {
       final question = q.questionCtrl.text.trim();
       final opt1 = q.opt1Ctrl.text.trim();
@@ -58,7 +58,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Completa todas las preguntas y opciones'), backgroundColor: AppColors.error));
         return;
       }
-      questionsData.add(QuizQuestionModel(
+      questionsData.add(QuizQuestion(
         question: question,
         options: [opt1, opt2, opt3, opt4],
         correctIndex: q.correctIndex,
@@ -69,7 +69,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
     setState(() => _saving = true);
 
     try {
-      final quiz = QuizModel(
+      final quiz = Quiz(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: AuthRepository().currentUser?.id,
         title: _titleCtrl.text.trim(),

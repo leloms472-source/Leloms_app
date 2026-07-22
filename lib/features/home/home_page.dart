@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/responsive.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/study_provider.dart';
-import '../../providers/sanctuary_provider.dart';
-import '../../providers/challenge_provider.dart';
 import '../ia/ia_page.dart';
 import '../ia/community_page.dart';
 import '../library/library_page.dart';
 import '../wellness/wellness_page.dart';
 import '../calendar/calendar_page.dart';
 import '../profile/profile_page.dart';
-import '../sanctuary/sanctuary_page.dart';
-import '../shop/shop_page.dart';
 import '../study/study_timer_page.dart';
 import '../analytics/analytics_page.dart';
 import '../exam/exam_config_page.dart';
@@ -34,7 +31,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final user = context.watch<ProfileProvider>();
     final study = context.watch<StudyProvider>();
-    final sanctuary = context.watch<SanctuaryProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -50,20 +46,18 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(Responsive.padding(context)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(user),
-            const SizedBox(height: 20),
-            _buildLiveStats(user, sanctuary),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.isMobile(context) ? 20 : 28),
+            _buildLiveStats(user),
+            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
             _buildQuickActions(context),
-            const SizedBox(height: 24),
-            _buildDailyChallenges(),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
             _buildDueReviews(),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.isMobile(context) ? 24 : 32),
             _buildTodayStudy(study),
             const SizedBox(height: 32),
           ],
@@ -98,8 +92,6 @@ class _HomePageState extends State<HomePage> {
           _buildDrawerItem(Icons.assignment_rounded, 'Simulacros', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
           _buildDrawerItem(Icons.show_chart_rounded, 'Progreso', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AnalyticsPage()))),
           _buildDrawerItem(Icons.timer_rounded, 'Temporizador', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
-          _buildDrawerItem(Icons.pets_rounded, 'Santuario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage()))),
-          _buildDrawerItem(Icons.shopping_bag_rounded, 'Tienda', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopPage()))),
           _buildDrawerItem(Icons.school_rounded, 'Biblioteca', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LibraryPage()))),
           _buildDrawerItem(Icons.self_improvement_rounded, 'Bienestar', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WellnessPage()))),
           _buildDrawerItem(Icons.calendar_month_rounded, 'Calendario', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()))),
@@ -158,7 +150,7 @@ class _HomePageState extends State<HomePage> {
     return '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
   }
 
-  Widget _buildLiveStats(ProfileProvider user, SanctuaryProvider sanctuary) {
+  Widget _buildLiveStats(ProfileProvider user) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -170,8 +162,6 @@ class _HomePageState extends State<HomePage> {
         Row(children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 20), const SizedBox(width: 6), Text('Racha: ${user.streak} días', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))]),
-            const SizedBox(height: 8),
-            Row(children: [const Icon(Icons.pets_rounded, color: Colors.white70, size: 16), const SizedBox(width: 6), Text('Árbol: ${sanctuary.treeStageName}', style: const TextStyle(color: Colors.white70, fontSize: 13))]),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(20))), child: Text('Nv. ${user.level}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
@@ -194,26 +184,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildQuickActions(BuildContext context) {
+    final quickItems = [
+      _QuickActionData(Icons.smart_toy_rounded, 'IA Leloms', AppColors.primary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IaPage()))),
+      _QuickActionData(Icons.assignment_rounded, 'Simulacro', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage()))),
+      _QuickActionData(Icons.timer_rounded, 'Pomodoro', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage()))),
+      _QuickActionData(Icons.groups_rounded, 'Comunidad', AppColors.secondary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage()))),
+    ];
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Acceso Rápido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
       const SizedBox(height: 12),
-      Row(children: [
-        Expanded(child: _buildQuickCard(Icons.smart_toy_rounded, 'IA Leloms', AppColors.primary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const IaPage())))),
-        const SizedBox(width: 8),
-        Expanded(child: _buildQuickCard(Icons.assignment_rounded, 'Simulacro', AppColors.error, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExamConfigPage())))),
-      ]),
-      const SizedBox(height: 8),
-      Row(children: [
-        Expanded(child: _buildQuickCard(Icons.timer_rounded, 'Pomodoro', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StudyTimerPage())))),
-        const SizedBox(width: 8),
-        Expanded(child: _buildQuickCard(Icons.groups_rounded, 'Comunidad', AppColors.secondary, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityPage())))),
-      ]),
-      const SizedBox(height: 8),
-      Row(children: [
-        Expanded(child: _buildQuickCard(Icons.shopping_bag_rounded, 'Tienda', AppColors.gold, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopPage())))),
-        const SizedBox(width: 8),
-        Expanded(child: _buildQuickCard(Icons.pets_rounded, 'Santuario', AppColors.success, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SanctuaryPage())))),
-      ]),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: quickItems.map((item) => SizedBox(
+          width: Responsive.cardWidth(context),
+          child: _buildQuickCard(item.icon, item.label, item.color, item.onTap),
+        )).toList(),
+      ),
     ]);
   }
 
@@ -247,67 +235,6 @@ class _HomePageState extends State<HomePage> {
           Text('Todo al día', style: TextStyle(color: AppColors.lightText, fontWeight: FontWeight.w600, fontSize: 14)),
           Text('Revisa tus flashcards en la biblioteca', style: TextStyle(color: AppColors.secondaryText, fontSize: 12)),
         ])),
-      ]),
-    );
-  }
-
-  Widget _buildDailyChallenges() {
-    final challenges = context.watch<ChallengeProvider>();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-        border: Border.all(color: challenges.allCompleted ? AppColors.success.withValues(alpha: 0.3) : AppColors.primary.withValues(alpha: 0.15)),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.2), borderRadius: const BorderRadius.all(Radius.circular(8))), child: const Icon(Icons.emoji_events_rounded, color: AppColors.gold, size: 18)),
-          const SizedBox(width: 10),
-          const Text('Desafíos Diarios', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.lightText)),
-          const Spacer(),
-          Text('${challenges.completedCount}/${challenges.totalCount}', style: TextStyle(color: challenges.allCompleted ? AppColors.success : AppColors.secondaryText, fontSize: 13, fontWeight: FontWeight.bold)),
-        ]),
-        const SizedBox(height: 14),
-        ...challenges.challenges.map((c) => Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: c.isCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.transparent,
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            border: Border.all(color: c.isCompleted ? AppColors.success.withValues(alpha: 0.2) : AppColors.border.withValues(alpha: 0.3)),
-          ),
-          child: Row(children: [
-            Icon(c.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, color: c.isCompleted ? AppColors.success : AppColors.secondaryText, size: 20),
-            const SizedBox(width: 10),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(c.title, style: const TextStyle(color: AppColors.lightText, fontSize: 13, fontWeight: FontWeight.w600)),
-              Text(c.description, style: const TextStyle(color: AppColors.secondaryText, fontSize: 11)),
-            ])),
-            const SizedBox(width: 8),
-            Text('+${c.xpReward} XP', style: TextStyle(color: c.isCompleted ? AppColors.success : AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
-          ]),
-        )),
-        if (challenges.canClaim)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final xp = challenges.claimAllRewards();
-                  if (xp > 0 && context.mounted) {
-                    context.read<ProfileProvider>().addXp(xp);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('¡Ganaste $xp XP extra por los desafíos!'), backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating));
-                  }
-                },
-                icon: const Icon(Icons.workspace_premium_rounded, size: 18),
-                label: Text('Reclamar ${challenges.challenges.fold(0, (s, c) => s + c.xpReward)} XP'),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.gold, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 12)),
-              ),
-            ),
-          ),
       ]),
     );
   }
@@ -355,6 +282,14 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+}
+
+class _QuickActionData {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _QuickActionData(this.icon, this.label, this.color, this.onTap);
 }
 
 

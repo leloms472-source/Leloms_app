@@ -1,37 +1,32 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:path/path.dart' as p;
 import '../supabase/supabase_client.dart';
 
 class StorageRepository {
   SupabaseClient get _client => SupabaseConfig.client;
 
-  Future<String> uploadAvatar(String userId, File file) async {
-    final ext = p.extension(file.path);
-    final path = '$userId/avatar$ext';
-    await _client.storage.from('avatars').upload(path, file, fileOptions: const FileOptions(upsert: true));
-    final url = _client.storage.from('avatars').getPublicUrl(path);
-    return url;
+  Future<String> uploadAvatar(String userId, Uint8List bytes, String extension) async {
+    final path = '$userId/avatar$extension';
+    await _client.storage.from('avatars').uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
+    return _client.storage.from('avatars').getPublicUrl(path);
   }
 
-  Future<String> uploadNoteFile(String userId, String fileName, File file) async {
+  Future<String> uploadNoteFile(String userId, String fileName, Uint8List bytes) async {
     final path = '$userId/$fileName';
-    await _client.storage.from('notes').upload(path, file, fileOptions: const FileOptions(upsert: true));
+    await _client.storage.from('notes').uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
     return path;
   }
 
-  Future<String> uploadPdf(String userId, String fileName, File file) async {
+  Future<String> uploadPdf(String userId, String fileName, Uint8List bytes) async {
     final path = '$userId/$fileName';
-    await _client.storage.from('pdfs').upload(path, file, fileOptions: const FileOptions(upsert: true));
-    final url = _client.storage.from('pdfs').getPublicUrl(path);
-    return url;
+    await _client.storage.from('pdfs').uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
+    return _client.storage.from('pdfs').getPublicUrl(path);
   }
 
-  Future<String> uploadCommunityFile(String fileName, File file) async {
+  Future<String> uploadCommunityFile(String fileName, Uint8List bytes) async {
     final path = fileName;
-    await _client.storage.from('community').upload(path, file, fileOptions: const FileOptions(upsert: true));
-    final url = _client.storage.from('community').getPublicUrl(path);
-    return url;
+    await _client.storage.from('community').uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
+    return _client.storage.from('community').getPublicUrl(path);
   }
 
   Future<void> deleteAvatar(String userId) async {

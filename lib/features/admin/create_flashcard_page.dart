@@ -40,7 +40,7 @@ class _CreateFlashcardPageState extends State<CreateFlashcardPage> {
 
     try {
       final userId = AuthRepository().currentUser?.id;
-      final flashcard = FlashcardModel(
+      final flashcard = Flashcard(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: userId,
         front: _frontCtrl.text.trim(),

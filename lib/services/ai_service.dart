@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 
 class AiService {
+  final http.Client _client = http.Client();
   String _baseUrl = 'https://api.openai.com/v1';
   String? _apiKey;
   String _model = 'gpt-4o-mini';
@@ -53,19 +54,17 @@ Usa terminología médica correcta pero explica con claridad.
     };
 
     try {
-      final client = HttpClient()
-        ..connectionTimeout = const Duration(seconds: 30);
-
-      final request = await client.postUrl(Uri.parse('$_baseUrl/chat/completions'));
-      request.headers.set('Content-Type', 'application/json');
-      request.headers.set('Authorization', 'Bearer $_apiKey');
-      request.add(utf8.encode(jsonEncode(body)));
-
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
+      final response = await _client.post(
+        Uri.parse('$_baseUrl/chat/completions'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_apiKey',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(responseBody) as Map<String, dynamic>;
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
         final choices = data['choices'] as List<dynamic>;
         if (choices.isNotEmpty) {
           final choice = choices[0] as Map<String, dynamic>;
@@ -74,7 +73,7 @@ Usa terminología médica correcta pero explica con claridad.
         }
         return 'No se pudo obtener respuesta.';
       } else {
-        return 'Error ${response.statusCode}: $responseBody';
+        return 'Error ${response.statusCode}: ${response.body}';
       }
     } catch (e) {
       return 'Error de conexión: $e';

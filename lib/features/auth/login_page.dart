@@ -7,11 +7,7 @@ import '../../core/repositories/auth_repository.dart';
 import '../../core/repositories/profile_repository_impl.dart';
 import '../../core/models/profile_model.dart';
 import '../../providers/profile_provider.dart';
-import '../../providers/sanctuary_provider.dart';
 import '../../providers/study_provider.dart';
-import '../../providers/achievement_provider.dart';
-import '../../providers/challenge_provider.dart';
-import '../../providers/shop_provider.dart';
 import '../home/home_page.dart';
 import '../../widgets/loading_overlay.dart';
 
@@ -152,11 +148,7 @@ class _LoginPageState extends State<LoginPage>
 
     if (mounted) {
       final uid = user.id;
-      context.read<SanctuaryProvider>().loadFromServer(uid);
       context.read<StudyProvider>().loadFromServer(uid);
-      context.read<AchievementProvider>().loadFromServer(uid);
-      context.read<ChallengeProvider>().loadFromServer(uid);
-      context.read<ShopProvider>().loadFromServer(uid);
     }
   }
 

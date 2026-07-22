@@ -1,4 +1,4 @@
-class FlashcardModel {
+class Flashcard {
   final String id;
   final String? userId;
   final String front;
@@ -10,7 +10,7 @@ class FlashcardModel {
   int repetitions;
   DateTime? nextReviewDate;
 
-  FlashcardModel({
+  Flashcard({
     required this.id,
     this.userId,
     required this.front,
@@ -28,6 +28,11 @@ class FlashcardModel {
     return DateTime.now().isAfter(nextReviewDate!);
   }
 
+  int get daysUntilReview {
+    if (nextReviewDate == null) return 0;
+    return DateTime.now().difference(nextReviewDate!).inDays.abs();
+  }
+
   Map<String, dynamic> toMap() => {
         'user_id': userId,
         'front': front,
@@ -40,8 +45,8 @@ class FlashcardModel {
         'next_review_date': nextReviewDate?.toUtc().toIso8601String(),
       };
 
-  factory FlashcardModel.fromMap(String id, Map<String, dynamic> map) {
-    return FlashcardModel(
+  factory Flashcard.fromMap(String id, Map<String, dynamic> map) {
+    return Flashcard(
       id: id,
       userId: map['user_id'] as String?,
       front: map['front'] as String? ?? '',
@@ -59,7 +64,7 @@ class FlashcardModel {
 }
 
 class Sm2Algorithm {
-  static void applyReview(FlashcardModel card, int quality) {
+  static void applyReview(Flashcard card, int quality) {
     if (quality < 0 || quality > 5) return;
 
     if (quality >= 3) {

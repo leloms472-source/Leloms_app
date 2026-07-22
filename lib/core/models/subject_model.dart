@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SubjectModel {
+class Subject {
   final String id;
   final String name;
   final String? description;
@@ -10,7 +10,7 @@ class SubjectModel {
   final Color color;
   final IconData icon;
 
-  SubjectModel({
+  Subject({
     required this.id,
     required this.name,
     this.description,
@@ -21,8 +21,8 @@ class SubjectModel {
     this.icon = Icons.school_rounded,
   });
 
-  factory SubjectModel.fromMap(String id, Map<String, dynamic> map) {
-    return SubjectModel(
+  factory Subject.fromMap(String id, Map<String, dynamic> map) {
+    return Subject(
       id: id,
       name: map['name'] as String? ?? '',
       description: map['description'] as String?,

@@ -159,7 +159,7 @@ class _AdminPageState extends State<AdminPage> {
             onPressed: () async {
               if (nameCtrl.text.trim().isEmpty) return;
               final color = int.tryParse(colorCtrl.text.replaceAll('0x', ''), radix: 16) ?? 0xFF6366F1;
-              final subject = SubjectModel(
+              final subject = Subject(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 name: nameCtrl.text.trim(),
                 color: Color(color),

@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/study_provider.dart';
-import '../../providers/achievement_provider.dart';
-import '../../providers/challenge_provider.dart';
 
 class StudyTimerPage extends StatefulWidget {
   const StudyTimerPage({super.key});
@@ -97,13 +95,6 @@ class _StudyTimerPageState extends State<StudyTimerPage>
       _sessionCount++;
       context.read<ProfileProvider>().addXp(25);
       context.read<StudyProvider>().completeSession(minutes);
-      final achievements = context.read<AchievementProvider>();
-      achievements.tryUnlock(AchievementId.firstPomodoro);
-      if (_sessionCount >= 50) {
-        achievements.tryUnlock(AchievementId.focusMaster);
-      }
-      context.read<ChallengeProvider>().addProgress(ChallengeType.studyTime, minutes);
-      context.read<ChallengeProvider>().addProgress(ChallengeType.pomodoroSessions, 1);
 
       setState(() {
         _isBreak = true;

@@ -37,25 +37,10 @@ class ProfileRepository implements IProfileRepository {
   }
 
   @override
-  Future<void> updateCoins(String userId, int coins) async {
-    await _datasource.updateProfile(userId, {'coins': coins});
-  }
-
-  @override
   Future<void> updateDailyMinutes(String userId, int minutes) async {
     await _datasource.updateProfile(userId, {
       'daily_study_minutes': minutes,
     });
-  }
-
-  @override
-  Future<void> updateEnergy(String userId, int energy) async {
-    await _datasource.updateProfile(userId, {'energy': energy});
-  }
-
-  @override
-  Future<void> updateHearts(String userId, int hearts) async {
-    await _datasource.updateProfile(userId, {'hearts': hearts});
   }
 
   @override

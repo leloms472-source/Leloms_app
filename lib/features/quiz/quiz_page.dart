@@ -1,12 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/quiz.dart';
-import '../../providers/sanctuary_provider.dart';
-import '../../providers/achievement_provider.dart';
-import '../../providers/challenge_provider.dart';
 
 class QuizPage extends StatefulWidget {
   final Quiz quiz;
@@ -79,13 +75,6 @@ class _QuizPageState extends State<QuizPage> {
 
   void _finishQuiz() {
     _timer.cancel();
-    context.read<SanctuaryProvider>().addStudyXp(_correctCount * 5);
-    final achievements = context.read<AchievementProvider>();
-    achievements.tryUnlock(AchievementId.firstQuiz);
-    if (_correctCount >= widget.quiz.questions.length * 0.8) {
-      achievements.tryUnlock(AchievementId.quizMaster);
-    }
-    context.read<ChallengeProvider>().addProgress(ChallengeType.quizQuestions, widget.quiz.questions.length);
     setState(() => _isFinished = true);
   }
 
@@ -349,7 +338,6 @@ class _QuizPageState extends State<QuizPage> {
 
   Widget _buildResults() {
     final percentage = (_correctCount / widget.quiz.questions.length * 100).round();
-    final sanctuary = context.read<SanctuaryProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -418,23 +406,6 @@ class _QuizPageState extends State<QuizPage> {
                   color: AppColors.lightText,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Has ganado ${_correctCount * 5} XP para tu árbol',
-                style: const TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Total: ${sanctuary.totalXp} XP',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 40),

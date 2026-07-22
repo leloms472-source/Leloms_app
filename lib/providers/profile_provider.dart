@@ -24,13 +24,9 @@ class ProfileProvider extends ChangeNotifier {
   int get currentXp => _profile?.xp ?? 0;
   int get nextLevelXp => _profile?.nextLevelXp ?? 100;
   int get streak => _profile?.streak ?? 0;
-  int get coins => _profile?.coins ?? 0;
   bool get isInitialized => _isInitialized;
   double get xpProgress => _profile?.xpProgress ?? 0;
   int get dailyStudyMinutes => _profile?.dailyStudyMinutes ?? 0;
-  int get energy => _profile?.energy ?? 100;
-  int get hearts => _profile?.hearts ?? 5;
-  int get experienceTotal => _profile?.experienceTotal ?? 0;
   String get language => _profile?.language ?? 'es';
   String? get country => _profile?.country;
   String? get timezone => _profile?.timezone;
@@ -106,52 +102,10 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addCoins(int amount) {
-    if (_profile == null) return;
-    final newCoins = _profile!.coins + amount;
-    _profile = _profile!.copyWith(coins: newCoins);
-    _profileRepo.updateCoins(_profile!.id, newCoins);
-    notifyListeners();
-  }
-
-  void spendCoins(int amount) {
-    if (_profile == null || _profile!.coins < amount) return;
-    final newCoins = _profile!.coins - amount;
-    _profile = _profile!.copyWith(coins: newCoins);
-    _profileRepo.updateCoins(_profile!.id, newCoins);
-    notifyListeners();
-  }
-
   void updateDailyStudyMinutes(int minutes) {
     if (_profile == null) return;
     _profile = _profile!.copyWith(dailyStudyMinutes: minutes);
     _profileRepo.updateDailyMinutes(_profile!.id, minutes);
-    notifyListeners();
-  }
-
-  void updateEnergy(int value) {
-    if (_profile == null) return;
-    final clamped = value.clamp(0, 100);
-    _profile = _profile!.copyWith(energy: clamped);
-    _profileRepo.updateEnergy(_profile!.id, clamped);
-    notifyListeners();
-  }
-
-  void updateHearts(int value) {
-    if (_profile == null) return;
-    final clamped = value.clamp(0, 5);
-    _profile = _profile!.copyWith(hearts: clamped);
-    _profileRepo.updateHearts(_profile!.id, clamped);
-    notifyListeners();
-  }
-
-  Future<void> addExperienceTotal(int amount) async {
-    if (_profile == null) return;
-    final total = _profile!.experienceTotal + amount;
-    _profile = _profile!.copyWith(experienceTotal: total);
-    await _profileRepo.updateProfile(_profile!.id, {
-      'experience_total': total,
-    });
     notifyListeners();
   }
 

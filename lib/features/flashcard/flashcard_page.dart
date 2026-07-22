@@ -1,12 +1,8 @@
 import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/flashcard.dart';
-import '../../providers/sanctuary_provider.dart';
-import '../../providers/achievement_provider.dart';
-import '../../providers/challenge_provider.dart';
 
 class FlashcardPage extends StatefulWidget {
   final List<Flashcard> flashcards;
@@ -79,14 +75,6 @@ class _FlashcardPageState extends State<FlashcardPage>
   }
 
   void _finishSession() {
-    context.read<SanctuaryProvider>().addStudyXp(_learnedCount * 3);
-    final achievements = context.read<AchievementProvider>();
-    achievements.tryUnlock(AchievementId.firstFlashcard);
-    if (_learnedCount >= 50) {
-      achievements.tryUnlock(AchievementId.memoryChampion);
-    }
-    context.read<ChallengeProvider>().addProgress(ChallengeType.flashcards, _learnedCount);
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -105,7 +93,7 @@ class _FlashcardPageState extends State<FlashcardPage>
               style: const TextStyle(color: AppColors.success, fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text('Ganaste ${_learnedCount * 3} XP', style: const TextStyle(color: AppColors.primary)),
+            Text('$_learnedCount revisadas', style: const TextStyle(color: AppColors.success, fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
         actions: [

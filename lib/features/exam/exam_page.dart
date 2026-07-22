@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/exam.dart';
 import '../../providers/profile_provider.dart';
-import '../../providers/sanctuary_provider.dart';
-import '../../providers/achievement_provider.dart';
 import '../../services/supabase_service.dart';
 
 class ExamPage extends StatefulWidget {
@@ -143,10 +141,6 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
 
     final xpGained = correctCount * 10;
     context.read<ProfileProvider>().addXp(xpGained);
-    context.read<SanctuaryProvider>().addXp(xpGained);
-
-    final achievements = context.read<AchievementProvider>();
-    achievements.tryUnlock(AchievementId.firstQuiz);
 
     if (!mounted) return;
     setState(() => _isFinished = true);
