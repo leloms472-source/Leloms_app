@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/flashcard.dart';
-import '../../services/firestore_service.dart';
+import '../../services/supabase_service.dart';
 import 'flashcard_page.dart';
 
 class ReviewQueuePage extends StatelessWidget {
@@ -9,7 +9,7 @@ class ReviewQueuePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firestore = FirestoreService();
+    final supabase = SupabaseService();
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -19,7 +19,7 @@ class ReviewQueuePage extends StatelessWidget {
         elevation: 0,
       ),
       body: FutureBuilder<List<Flashcard>>(
-        future: firestore.getFlashcards(),
+        future: supabase.getFlashcards(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: AppColors.primary));

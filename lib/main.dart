@@ -5,7 +5,7 @@ import 'core/theme/app_colors.dart';
 import 'core/theme/app_typography.dart';
 import 'core/supabase/supabase_client.dart';
 import 'features/auth/splash_page.dart';
-import 'providers/user_provider.dart';
+import 'providers/profile_provider.dart';
 import 'providers/sanctuary_provider.dart' show SanctuaryProvider, TreeStage;
 import 'providers/study_provider.dart';
 import 'providers/achievement_provider.dart';
@@ -38,7 +38,7 @@ class LelomsApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: themeProvider),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
         ChangeNotifierProvider(create: (_) => StudyProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
@@ -216,7 +216,7 @@ class _AchievementListenerState extends State<_AchievementListener> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final user = context.read<UserProvider>();
+    final user = context.read<ProfileProvider>();
     _lastXpCheck = user.currentXp;
     _lastStreakCheck = user.streak;
   }
@@ -246,7 +246,7 @@ class _AchievementListenerState extends State<_AchievementListener> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>();
+    final user = context.watch<ProfileProvider>();
     final sanctuary = context.watch<SanctuaryProvider>();
     final achievements = context.read<AchievementProvider>();
 

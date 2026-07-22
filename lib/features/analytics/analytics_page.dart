@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../providers/study_provider.dart';
 import '../../widgets/section_title.dart';
 import '../../widgets/stat_card.dart';
@@ -12,7 +12,7 @@ class AnalyticsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>();
+    final user = context.watch<ProfileProvider>();
     final study = context.watch<StudyProvider>();
 
     return Scaffold(
@@ -46,7 +46,7 @@ class AnalyticsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOverviewCards(UserProvider user, StudyProvider study) {
+  Widget _buildOverviewCards(ProfileProvider user, StudyProvider study) {
     return Column(
       children: [
         Row(
@@ -176,7 +176,7 @@ class AnalyticsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryGrid(UserProvider user, StudyProvider study) {
+  Widget _buildSummaryGrid(ProfileProvider user, StudyProvider study) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(color: AppColors.darkCard, borderRadius: BorderRadius.circular(16)),

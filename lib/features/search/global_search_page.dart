@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../services/firestore_service.dart';
+import '../../services/supabase_service.dart';
 import '../quiz/quiz_page.dart';
 import '../flashcard/flashcard_page.dart';
 import '../../models/quiz.dart';
@@ -19,7 +19,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   List<Map<String, dynamic>> _results = [];
   bool _isSearching = false;
 
-  final FirestoreService _firestore = FirestoreService();
+  final SupabaseService _supabase = SupabaseService();
 
   void _search(String query) {
     setState(() {
@@ -34,7 +34,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
     final lower = query.toLowerCase();
 
-    _firestore.getQuizzes().then((quizzes) {
+    _supabase.getQuizzes().then((quizzes) {
       final matches = quizzes.where((q) =>
         q.title.toLowerCase().contains(lower) ||
         q.subject.toLowerCase().contains(lower)
@@ -49,7 +49,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       if (mounted) setState(() => _results.addAll(matches));
     });
 
-    _firestore.getFlashcards().then((cards) {
+    _supabase.getFlashcards().then((cards) {
       final matches = cards.where((c) =>
         c.front.toLowerCase().contains(lower) ||
         c.back.toLowerCase().contains(lower) ||
@@ -65,7 +65,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       if (mounted) setState(() => _results.addAll(matches));
     });
 
-    _firestore.getSubjects().then((subjects) {
+    _supabase.getSubjects().then((subjects) {
       final matches = subjects.where((s) =>
         s.name.toLowerCase().contains(lower)
       ).map((s) => {

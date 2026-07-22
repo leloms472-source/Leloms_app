@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/shop_provider.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/profile_provider.dart';
 
 class ShopPage extends StatelessWidget {
   const ShopPage({super.key});
@@ -10,7 +10,7 @@ class ShopPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shop = context.watch<ShopProvider>();
-    final user = context.watch<UserProvider>();
+    final user = context.watch<ProfileProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -149,7 +149,7 @@ class ShopPage extends StatelessWidget {
     );
   }
 
-  Widget _buildShopItem(BuildContext context, ShopItem item, ShopProvider shop, UserProvider user) {
+  Widget _buildShopItem(BuildContext context, ShopItem item, ShopProvider shop, ProfileProvider user) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.darkCard,
@@ -238,7 +238,7 @@ class ShopPage extends StatelessWidget {
     );
   }
 
-  void _showPurchaseDialog(BuildContext context, ShopItem item, ShopProvider shop, UserProvider user) {
+  void _showPurchaseDialog(BuildContext context, ShopItem item, ShopProvider shop, ProfileProvider user) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

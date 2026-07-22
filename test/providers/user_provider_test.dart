@@ -1,21 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leloms_app/providers/user_provider.dart';
+import 'package:leloms_app/providers/profile_provider.dart';
 
 void main() {
-  late UserProvider provider;
+  late ProfileProvider provider;
 
   setUp(() {
-    provider = UserProvider();
+    provider = ProfileProvider();
   });
 
-  group('UserProvider', () {
+  group('ProfileProvider', () {
     test('initial values are correct', () {
       expect(provider.userName, 'Estudiante');
       expect(provider.level, 1);
       expect(provider.currentXp, 0);
       expect(provider.nextLevelXp, 100);
       expect(provider.streak, 0);
-      expect(provider.isLoggedIn, false);
       expect(provider.xpProgress, 0.0);
     });
 

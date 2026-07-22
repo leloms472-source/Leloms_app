@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/repositories/auth_repository.dart';
-import '../../core/repositories/profile_repository.dart';
-import '../../providers/user_provider.dart';
+import '../../core/repositories/i_profile_repository.dart';
+import '../../core/repositories/profile_repository_impl.dart';
+import '../../providers/profile_provider.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/study_provider.dart';
 import '../../providers/achievement_provider.dart';
@@ -23,7 +23,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  final AuthRepository _authRepo = AuthRepository();
+  final IProfileRepository _profileRepo = ProfileRepository();
   late AnimationController _controller;
   late Animation<double> _logoScale;
   late Animation<double> _logoFade;
@@ -86,32 +86,25 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _navigateToHome() async {
-    final session = _authRepo.currentSession;
+    final profileProvider = context.read<ProfileProvider>();
+    await profileProvider.initialize();
 
-    if (session != null) {
-      final userProvider = context.read<UserProvider>();
-      final profileRepo = ProfileRepository();
-      final profile = await profileRepo.getProfile(session.user.id);
+    final hasProfile = profileProvider.isInitialized && profileProvider.profile != null;
 
-      if (profile != null) {
-        userProvider.setProfile(profile);
-      }
-
-      if (mounted) {
-        final uid = session.user.id;
-        context.read<SanctuaryProvider>().loadFromServer(uid);
-        context.read<StudyProvider>().loadFromServer(uid);
-        context.read<AchievementProvider>().loadFromServer(uid);
-        context.read<ChallengeProvider>().loadFromServer(uid);
-        context.read<ShopProvider>().loadFromServer(uid);
-      }
+    if (hasProfile && mounted) {
+      final uid = profileProvider.profile!.id;
+      context.read<SanctuaryProvider>().loadFromServer(uid);
+      context.read<StudyProvider>().loadFromServer(uid);
+      context.read<AchievementProvider>().loadFromServer(uid);
+      context.read<ChallengeProvider>().loadFromServer(uid);
+      context.read<ShopProvider>().loadFromServer(uid);
     }
 
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            session != null ? const HomePage() : const LoginPage(),
+            hasProfile ? const HomePage() : const LoginPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },

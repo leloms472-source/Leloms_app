@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/repositories/auth_repository.dart';
-import '../../core/repositories/profile_repository.dart';
+import '../../core/repositories/profile_repository_impl.dart';
 import '../../core/models/profile_model.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/study_provider.dart';
 import '../../providers/achievement_provider.dart';
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage>
     final user = _authRepo.currentUser;
     if (user == null) return;
 
-    final userProvider = context.read<UserProvider>();
+    final userProvider = context.read<ProfileProvider>();
     final profileRepo = ProfileRepository();
     final profile = await profileRepo.getProfile(user.id);
 
@@ -144,10 +144,9 @@ class _LoginPageState extends State<LoginPage>
     } else {
       final newProfile = ProfileModel(
         id: user.id,
-        name: user.userMetadata?['name'] as String? ?? 'Estudiante',
-        email: user.email,
+        fullName: user.userMetadata?['name'] as String? ?? 'Estudiante',
       );
-      await profileRepo.upsertProfile(newProfile);
+      await profileRepo.createProfile(newProfile);
       userProvider.setProfile(newProfile);
     }
 

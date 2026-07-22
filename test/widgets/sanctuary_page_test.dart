@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:leloms_app/features/sanctuary/sanctuary_page.dart';
 import 'package:leloms_app/providers/sanctuary_provider.dart';
-import 'package:leloms_app/providers/user_provider.dart';
+import 'package:leloms_app/providers/profile_provider.dart';
 
 Widget createTestApp() {
   return MaterialApp(
     home: MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => SanctuaryProvider()),
       ],
       child: const SanctuaryPage(),

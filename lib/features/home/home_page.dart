@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../providers/study_provider.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/challenge_provider.dart';
@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>();
+    final user = context.watch<ProfileProvider>();
     final study = context.watch<StudyProvider>();
     final sanctuary = context.watch<SanctuaryProvider>();
 
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDrawer(UserProvider user) {
+  Widget _buildDrawer(ProfileProvider user) {
     return Drawer(
       backgroundColor: AppColors.dark,
       child: ListView(
@@ -128,7 +128,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeader(UserProvider user) {
+  Widget _buildHeader(ProfileProvider user) {
     final hour = DateTime.now().hour;
     String greeting;
     if (hour < 12) { greeting = 'Buenos días'; }
@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
     return '${days[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
   }
 
-  Widget _buildLiveStats(UserProvider user, SanctuaryProvider sanctuary) {
+  Widget _buildLiveStats(ProfileProvider user, SanctuaryProvider sanctuary) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -298,7 +298,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   final xp = challenges.claimAllRewards();
                   if (xp > 0 && context.mounted) {
-                    context.read<UserProvider>().addXp(xp);
+                    context.read<ProfileProvider>().addXp(xp);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('¡Ganaste $xp XP extra por los desafíos!'), backgroundColor: AppColors.success, behavior: SnackBarBehavior.floating));
                   }
                 },

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/profile_provider.dart';
 import '../../providers/achievement_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/secure_storage_service.dart';
@@ -81,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>();
+    final user = context.watch<ProfileProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.dark,
@@ -126,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildHeader(UserProvider user) {
+  Widget _buildHeader(ProfileProvider user) {
     return Column(children: [
       GestureDetector(
         onTap: _pickAvatar,

@@ -1,15 +1,20 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show Supabase, SupabaseClient;
 
 class SupabaseConfig {
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://your-project.supabase.co');
-  static const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'your-anon-key');
-
   static SupabaseClient get client => Supabase.instance.client;
 
   static Future<void> initialize() async {
+    await dotenv.load();
+    final url = dotenv.env['SUPABASE_URL'];
+    final anonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    assert(url != null && url.isNotEmpty, 'SUPABASE_URL not set in .env');
+    assert(anonKey != null && anonKey.isNotEmpty, 'SUPABASE_ANON_KEY not set in .env');
+
     await Supabase.initialize(
-      url: supabaseUrl,
-      anonKey: supabaseAnonKey,
+      url: url!,
+      publishableKey: anonKey!,
       debug: false,
     );
   }

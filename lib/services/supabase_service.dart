@@ -5,7 +5,7 @@ import '../models/quiz.dart';
 import '../models/flashcard.dart';
 import '../models/summary.dart';
 
-class FirestoreService {
+class SupabaseService {
   static final SupabaseClient _client = SupabaseConfig.client;
 
   // Subjects
