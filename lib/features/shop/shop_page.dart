@@ -125,7 +125,7 @@ class ShopPage extends StatelessWidget {
               ),
             ),
           const Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text('Objetos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.lightText)),
           ),
           Expanded(

@@ -120,7 +120,7 @@ class _ExamConfigPageState extends State<ExamConfigPage> {
                   children: [
                     if (selected)
                       const Padding(
-                        padding: const EdgeInsets.only(right: 6),
+                        padding: EdgeInsets.only(right: 6),
                         child: Icon(Icons.check_rounded, color: AppColors.primary, size: 16),
                       ),
                     Text(subject, style: TextStyle(color: selected ? AppColors.primary : AppColors.lightText, fontWeight: selected ? FontWeight.bold : FontWeight.normal, fontSize: 13)),

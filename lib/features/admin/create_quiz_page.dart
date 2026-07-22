@@ -178,7 +178,7 @@ class _CreateQuizPageState extends State<CreateQuizPage> {
   }
 
   Widget _buildOptionField(_QuestionForm q, int index) {
-    final letters = const ['A', 'B', 'C', 'D'];
+    const letters = ['A', 'B', 'C', 'D'];
     final isCorrect = q.correctIndex == index;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

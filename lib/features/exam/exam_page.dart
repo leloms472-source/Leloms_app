@@ -198,11 +198,11 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
               context: context,
               builder: (ctx) => AlertDialog(
                 backgroundColor: AppColors.darkCard,
-                title: const Text('¿Salir del simulacro?', style: const TextStyle(color: AppColors.lightText)),
-                content: const Text('Perderás todo el progreso', style: const TextStyle(color: AppColors.secondaryText)),
+                title: const Text('¿Salir del simulacro?', style: TextStyle(color: AppColors.lightText)),
+                content: const Text('Perderás todo el progreso', style: TextStyle(color: AppColors.secondaryText)),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Continuar', style: const TextStyle(color: AppColors.primary))),
-                  TextButton(onPressed: () { Navigator.pop(ctx); Navigator.pop(context); }, child: const Text('Salir', style: const TextStyle(color: AppColors.error))),
+                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Continuar', style: TextStyle(color: AppColors.primary))),
+                  TextButton(onPressed: () { Navigator.pop(ctx); Navigator.pop(context); }, child: const Text('Salir', style: TextStyle(color: AppColors.error))),
                 ],
               ),
             );
@@ -412,7 +412,7 @@ class _ExamPageState extends State<ExamPage> with TickerProviderStateMixin {
                   foregroundColor: Colors.white,
                   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
                 ),
-                child: const Text('Finalizar', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: const Text('Finalizar', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
             const SizedBox(height: 32),

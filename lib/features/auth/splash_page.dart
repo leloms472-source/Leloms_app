@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/repositories/i_profile_repository.dart';
-import '../../core/repositories/profile_repository_impl.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/sanctuary_provider.dart';
 import '../../providers/study_provider.dart';
@@ -23,7 +21,6 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  final IProfileRepository _profileRepo = ProfileRepository();
   late AnimationController _controller;
   late Animation<double> _logoScale;
   late Animation<double> _logoFade;
