@@ -1,41 +1,29 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_typography.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
-  final Widget? trailing;
+  final VoidCallback? onSeeAll;
 
   const SectionTitle({
     super.key,
     required this.title,
-    this.trailing,
+    this.onSeeAll,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (trailing != null) {
-      return Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.lightText,
-            ),
+    return Row(
+      children: [
+        Text(title, style: AppTypography.titleMedium),
+        const Spacer(),
+        if (onSeeAll != null)
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text('Ver todo', style: AppTypography.labelMedium.copyWith(color: AppColors.primary)),
           ),
-          const Spacer(),
-          trailing!,
-        ],
-      );
-    }
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: AppColors.lightText,
-      ),
+      ],
     );
   }
 }
