@@ -1,382 +1,265 @@
--- LELOMS Complete Schema Migration
--- Migration 001: Initial Schema
+-- ============================================================
+-- LELOMS v16 - Esquema inicial
+-- Plataforma de estudio para estudiantes de ciencias de la salud
+-- ============================================================
 
--- ==================== EXTENSIONS ====================
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- 1. TABLAS BASE
+-- ============================================================
 
--- ==================== PROFILES ====================
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL DEFAULT '',
-  email TEXT,
+  full_name TEXT NOT NULL DEFAULT '',
+  username TEXT UNIQUE NOT NULL DEFAULT '',
   avatar_url TEXT,
-  level INTEGER NOT NULL DEFAULT 1,
-  current_xp INTEGER NOT NULL DEFAULT 0,
-  next_level_xp INTEGER NOT NULL DEFAULT 100,
-  streak INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  career_id UUID,
+  university TEXT,
+  study_year INT NOT NULL DEFAULT 1,
+  bio TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== CAREERS ====================
-CREATE TABLE careers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.careers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  color TEXT,
+  icon_name TEXT,
+  subject_count INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== SUBJECTS ====================
-CREATE TABLE subjects (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE IF NOT EXISTS public.subjects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
-  color INTEGER NOT NULL DEFAULT 4282402545,
-  icon TEXT DEFAULT 'school',
-  progress REAL NOT NULL DEFAULT 0.0,
-  resources INTEGER NOT NULL DEFAULT 0,
-  completed INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  career_id UUID NOT NULL REFERENCES public.careers(id) ON DELETE CASCADE,
+  order_index INT NOT NULL DEFAULT 0,
+  color TEXT,
+  icon_name TEXT,
+  topics_count INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== NOTES ====================
-CREATE TABLE notes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  subject TEXT NOT NULL DEFAULT '',
-  title TEXT NOT NULL DEFAULT '',
-  content TEXT NOT NULL DEFAULT '',
-  is_synced BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS public.topics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  subject_id UUID NOT NULL REFERENCES public.subjects(id) ON DELETE CASCADE,
+  order_index INT NOT NULL DEFAULT 0,
+  color TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== FLASHCARDS ====================
-CREATE TABLE flashcards (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  front TEXT NOT NULL,
-  back TEXT NOT NULL,
-  subject TEXT NOT NULL DEFAULT '',
-  is_learned BOOLEAN NOT NULL DEFAULT FALSE,
-  easiness_factor REAL NOT NULL DEFAULT 2.5,
-  interval INTEGER NOT NULL DEFAULT 0,
-  repetitions INTEGER NOT NULL DEFAULT 0,
+-- 2. RECURSOS
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.resources (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  author_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  topic_id UUID REFERENCES public.topics(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  pdf_url TEXT,
+  is_public BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.summaries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
+  short_summary TEXT NOT NULL,
+  full_summary TEXT NOT NULL,
+  keywords TEXT[] NOT NULL DEFAULT '{}',
+  key_concepts TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.flashcards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  is_learned BOOLEAN NOT NULL DEFAULT false,
+  easiness_factor DOUBLE PRECISION NOT NULL DEFAULT 2.5,
+  interval INT NOT NULL DEFAULT 0,
+  repetitions INT NOT NULL DEFAULT 0,
   next_review_date TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_by TEXT
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== QUIZZES ====================
-CREATE TABLE quizzes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+CREATE TABLE IF NOT EXISTS public.quizzes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  subject TEXT NOT NULL DEFAULT '',
-  difficulty TEXT NOT NULL DEFAULT 'Intermedio',
-  questions JSONB NOT NULL DEFAULT '[]',
-  time_minutes INTEGER NOT NULL DEFAULT 10,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_by TEXT
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== STUDY_SESSIONS ====================
-CREATE TABLE study_sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.quiz_questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  quiz_id UUID NOT NULL REFERENCES public.quizzes(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  options TEXT[] NOT NULL DEFAULT '{}',
+  correct_answer INT NOT NULL,
+  explanation TEXT,
+  order_index INT NOT NULL DEFAULT 0
+);
+
+-- 3. ESTUDIO
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.study_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  exam_date TIMESTAMPTZ NOT NULL,
+  progress DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+  total_topics INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.study_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   session_type TEXT NOT NULL DEFAULT 'pomodoro',
-  minutes INTEGER NOT NULL DEFAULT 0,
-  xp_earned INTEGER NOT NULL DEFAULT 0,
-  subject TEXT,
-  completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  minutes INT NOT NULL DEFAULT 0,
+  subject_name TEXT,
+  completed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== ACHIEVEMENTS ====================
-CREATE TABLE achievements (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  achievement_id TEXT NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  unlocked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id, achievement_id)
-);
+-- 4. COMUNIDAD
+-- ============================================================
 
--- ==================== XP_HISTORY ====================
-CREATE TABLE xp_history (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  amount INTEGER NOT NULL,
-  source TEXT NOT NULL,
-  description TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ==================== STREAKS ====================
-CREATE TABLE streaks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  current_streak INTEGER NOT NULL DEFAULT 0,
-  longest_streak INTEGER NOT NULL DEFAULT 0,
-  last_study_date DATE,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-
--- ==================== PETS (SANCTUARY) ====================
-CREATE TABLE pets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  name TEXT NOT NULL DEFAULT 'Gato',
-  pet_type TEXT NOT NULL DEFAULT 'cat',
-  mood TEXT NOT NULL DEFAULT 'idle',
-  pet_count INTEGER NOT NULL DEFAULT 0,
-  feed_count INTEGER NOT NULL DEFAULT 0,
-  play_count INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-
--- ==================== SANCTUARY ====================
-CREATE TABLE sanctuary (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  total_xp INTEGER NOT NULL DEFAULT 0,
-  is_tree_watered BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-
--- ==================== TREES ====================
-CREATE TABLE trees (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  stage TEXT NOT NULL DEFAULT 'seed',
-  total_xp INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-
--- ==================== INVENTORY ====================
-CREATE TABLE inventory (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  item_id TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id, item_id)
-);
-
--- ==================== SHOP_ITEMS ====================
-CREATE TABLE shop_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  item_id TEXT NOT NULL UNIQUE,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  xp_cost INTEGER NOT NULL,
-  category TEXT NOT NULL DEFAULT 'cosmetic',
-  icon TEXT NOT NULL DEFAULT 'shopping_bag',
-  color INTEGER NOT NULL DEFAULT 4282402545,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE
-);
-
--- ==================== PURCHASES ====================
-CREATE TABLE purchases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  item_id TEXT NOT NULL,
-  xp_spent INTEGER NOT NULL,
-  purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ==================== GROUPS ====================
-CREATE TABLE study_groups (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  description TEXT,
-  created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE group_members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  group_id UUID NOT NULL REFERENCES study_groups(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'member',
-  joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(group_id, user_id)
-);
-
--- ==================== MESSAGES ====================
-CREATE TABLE messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  group_id UUID REFERENCES study_groups(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  author_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ
 );
 
--- ==================== NOTIFICATIONS ====================
-CREATE TABLE notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  type TEXT NOT NULL DEFAULT 'info',
-  data JSONB,
-  is_read BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS public.favorites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, resource_id)
 );
 
--- ==================== PREMIUM_SUBSCRIPTIONS ====================
-CREATE TABLE premium_subscriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  plan_type TEXT NOT NULL DEFAULT 'monthly',
-  is_active BOOLEAN NOT NULL DEFAULT FALSE,
-  started_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
+CREATE TABLE IF NOT EXISTS public.ratings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
+  value INT NOT NULL CHECK (value >= 1 AND value <= 5),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, resource_id)
 );
 
--- ==================== SETTINGS ====================
-CREATE TABLE settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  theme_mode TEXT NOT NULL DEFAULT 'dark',
-  notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-  sound_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-  haptic_feedback BOOLEAN NOT NULL DEFAULT TRUE,
-  study_reminder_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-  study_reminder_time TIME DEFAULT '09:00',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
-);
-
--- ==================== CHALLENGES ====================
-CREATE TABLE challenges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  challenge_type TEXT NOT NULL,
-  target INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS public.help_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  xp_reward INTEGER NOT NULL DEFAULT 50,
-  progress INTEGER NOT NULL DEFAULT 0,
-  is_completed BOOLEAN NOT NULL DEFAULT FALSE,
-  date DATE NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id, challenge_type, date)
+  subject_name TEXT,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'inProgress', 'resolved')),
+  helper_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  resolved_at TIMESTAMPTZ
 );
 
--- ==================== XP_BOOSTS ====================
-CREATE TABLE xp_boosts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  remaining_sessions INTEGER NOT NULL DEFAULT 3,
-  is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
+-- 5. IA
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.ai_jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  resource_id UUID NOT NULL REFERENCES public.resources(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  result_url TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  completed_at TIMESTAMPTZ
 );
 
--- ==================== COSMETICS ====================
-CREATE TABLE cosmetics (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  active_cat_cosmetic TEXT,
-  active_sanctuary_cosmetic TEXT,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(user_id)
+-- 6. REPUTACIÓN ACADÉMICA
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.academic_reputations (
+  user_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+  useful_resources INT NOT NULL DEFAULT 0,
+  students_helped INT NOT NULL DEFAULT 0,
+  positive_ratings INT NOT NULL DEFAULT 0,
+  accepted_contributions INT NOT NULL DEFAULT 0,
+  overall_score DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ==================== INDEXES ====================
-CREATE INDEX idx_profiles_email ON profiles(email);
-CREATE INDEX idx_profiles_streak ON profiles(streak);
-CREATE INDEX idx_flashcards_user ON flashcards(user_id);
-CREATE INDEX idx_flashcards_subject ON flashcards(subject);
-CREATE INDEX idx_flashcards_review ON flashcards(next_review_date) WHERE is_learned = TRUE;
-CREATE INDEX idx_quizzes_user ON quizzes(user_id);
-CREATE INDEX idx_quizzes_subject ON quizzes(subject);
-CREATE INDEX idx_study_sessions_user ON study_sessions(user_id);
-CREATE INDEX idx_study_sessions_date ON study_sessions(completed_at);
-CREATE INDEX idx_achievements_user ON achievements(user_id);
-CREATE INDEX idx_xp_history_user ON xp_history(user_id);
-CREATE INDEX idx_xp_history_created ON xp_history(created_at);
-CREATE INDEX idx_notifications_user ON notifications(user_id);
-CREATE INDEX idx_notifications_read ON notifications(is_read) WHERE is_read = FALSE;
-CREATE INDEX idx_messages_group ON messages(group_id);
-CREATE INDEX idx_messages_created ON messages(created_at);
-CREATE INDEX idx_challenges_user_date ON challenges(user_id, date);
-CREATE INDEX idx_purchases_user ON purchases(user_id);
-CREATE INDEX idx_notes_user ON notes(user_id);
-CREATE INDEX idx_subjects_name ON subjects(name);
+-- 7. ÍNDICES
+-- ============================================================
 
--- ==================== TRIGGERS ====================
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+CREATE INDEX IF NOT EXISTS idx_subjects_career_id ON public.subjects(career_id);
+CREATE INDEX IF NOT EXISTS idx_topics_subject_id ON public.topics(subject_id);
+CREATE INDEX IF NOT EXISTS idx_resources_author_id ON public.resources(author_id);
+CREATE INDEX IF NOT EXISTS idx_resources_topic_id ON public.resources(topic_id);
+CREATE INDEX IF NOT EXISTS idx_resources_is_public ON public.resources(is_public);
+CREATE INDEX IF NOT EXISTS idx_summaries_resource_id ON public.summaries(resource_id);
+CREATE INDEX IF NOT EXISTS idx_flashcards_resource_id ON public.flashcards(resource_id);
+CREATE INDEX IF NOT EXISTS idx_flashcards_next_review ON public.flashcards(next_review_date);
+CREATE INDEX IF NOT EXISTS idx_quiz_questions_quiz_id ON public.quiz_questions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_study_sessions_user_id ON public.study_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_study_sessions_completed_at ON public.study_sessions(completed_at);
+CREATE INDEX IF NOT EXISTS idx_study_plans_user_id ON public.study_plans(user_id);
+CREATE INDEX IF NOT EXISTS idx_comments_resource_id ON public.comments(resource_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON public.favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_resource_id ON public.favorites(resource_id);
+CREATE INDEX IF NOT EXISTS idx_ratings_resource_id ON public.ratings(resource_id);
+CREATE INDEX IF NOT EXISTS idx_help_requests_status ON public.help_requests(status);
+CREATE INDEX IF NOT EXISTS idx_ai_jobs_user_id ON public.ai_jobs(user_id);
+
+-- 8. FUNCIONES Y TRIGGERS
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = ''
+AS $$
 BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER set_profiles_updated_at
-  BEFORE UPDATE ON profiles
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_settings_updated_at
-  BEFORE UPDATE ON settings
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_pets_updated_at
-  BEFORE UPDATE ON pets
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_sanctuary_updated_at
-  BEFORE UPDATE ON sanctuary
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_trees_updated_at
-  BEFORE UPDATE ON trees
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_xp_boosts_updated_at
-  BEFORE UPDATE ON xp_boosts
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER set_cosmetics_updated_at
-  BEFORE UPDATE ON cosmetics
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- ==================== AUTO-CREATE PROFILE FUNCTION ====================
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, name, email)
+  INSERT INTO public.profiles (id, full_name, username)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'name', 'Estudiante'),
-    NEW.email
+    COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''),
+    COALESCE(NEW.raw_user_meta_data ->> 'username', '')
   );
-  INSERT INTO public.streaks (user_id) VALUES (NEW.id);
-  INSERT INTO public.sanctuary (user_id) VALUES (NEW.id);
-  INSERT INTO public.pets (user_id) VALUES (NEW.id);
-  INSERT INTO public.trees (user_id) VALUES (NEW.id);
-  INSERT INTO public.settings (user_id) VALUES (NEW.id);
-  INSERT INTO public.cosmetics (user_id) VALUES (NEW.id);
+  INSERT INTO public.academic_reputations (user_id)
+  VALUES (NEW.id);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+CREATE OR REPLACE FUNCTION public.update_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER set_profiles_updated_at
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at();
+
+CREATE TRIGGER set_academic_reputations_updated_at
+  BEFORE UPDATE ON public.academic_reputations
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at();

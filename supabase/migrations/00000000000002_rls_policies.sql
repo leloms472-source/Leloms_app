@@ -1,319 +1,231 @@
--- LELOMS RLS Policies Migration
--- Migration 002: Row Level Security Policies
+-- ============================================================
+-- LELOMS v16 - RLS Policies
+-- ============================================================
 
--- ==================== ENABLE RLS ====================
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE careers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE subjects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE flashcards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE quizzes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE study_sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
-ALTER TABLE xp_history ENABLE ROW LEVEL SECURITY;
-ALTER TABLE streaks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE pets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sanctuary ENABLE ROW LEVEL SECURITY;
-ALTER TABLE trees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE inventory ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shop_items ENABLE ROW LEVEL SECURITY;
-ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
-ALTER TABLE study_groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-ALTER TABLE premium_subscriptions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE challenges ENABLE ROW LEVEL SECURITY;
-ALTER TABLE xp_boosts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cosmetics ENABLE ROW LEVEL SECURITY;
+-- 1. PROFILES
+-- ============================================================
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- ==================== PROFILES ====================
-CREATE POLICY "users_can_read_own_profile"
-  ON profiles FOR SELECT
+CREATE POLICY "Profiles son públicos para lectura"
+  ON public.profiles FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuarios pueden actualizar su propio perfil"
+  ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
-CREATE POLICY "users_can_update_own_profile"
-  ON profiles FOR UPDATE
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+-- 2. CAREERS
+-- ============================================================
+ALTER TABLE public.careers ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users_can_insert_own_profile"
-  ON profiles FOR INSERT
-  WITH CHECK (auth.uid() = id);
+CREATE POLICY "Carreras son públicas"
+  ON public.careers FOR SELECT
+  USING (true);
 
--- ==================== CAREERS ====================
-CREATE POLICY "users_can_read_own_careers"
-  ON careers FOR SELECT
+-- 3. SUBJECTS
+-- ============================================================
+ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Materias son públicas"
+  ON public.subjects FOR SELECT
+  USING (true);
+
+-- 4. TOPICS
+-- ============================================================
+ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Temas son públicos"
+  ON public.topics FOR SELECT
+  USING (true);
+
+-- 5. RESOURCES
+-- ============================================================
+ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Recursos públicos visibles para todos"
+  ON public.resources FOR SELECT
+  USING (is_public = true OR auth.uid() = author_id);
+
+CREATE POLICY "Usuarios pueden crear recursos"
+  ON public.resources FOR INSERT
+  WITH CHECK (auth.uid() = author_id);
+
+CREATE POLICY "Autor puede actualizar su recurso"
+  ON public.resources FOR UPDATE
+  USING (auth.uid() = author_id);
+
+CREATE POLICY "Autor puede eliminar su recurso"
+  ON public.resources FOR DELETE
+  USING (auth.uid() = author_id);
+
+-- 6. SUMMARIES
+-- ============================================================
+ALTER TABLE public.summaries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Resúmenes son públicos"
+  ON public.summaries FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuarios pueden crear resúmenes"
+  ON public.summaries FOR INSERT
+  WITH CHECK (auth.uid() IN (SELECT author_id FROM public.resources WHERE id = resource_id));
+
+-- 7. FLASHCARDS
+-- ============================================================
+ALTER TABLE public.flashcards ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Flashcards son públicos"
+  ON public.flashcards FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuarios pueden crear flashcards"
+  ON public.flashcards FOR INSERT
+  WITH CHECK (auth.uid() IN (SELECT author_id FROM public.resources WHERE id = resource_id));
+
+CREATE POLICY "Usuarios pueden actualizar flashcards"
+  ON public.flashcards FOR UPDATE
+  USING (auth.uid() IN (SELECT author_id FROM public.resources WHERE id = resource_id));
+
+-- 8. QUIZZES
+-- ============================================================
+ALTER TABLE public.quizzes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Quizzes son públicos"
+  ON public.quizzes FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuarios pueden crear quizzes"
+  ON public.quizzes FOR INSERT
+  WITH CHECK (auth.uid() IN (SELECT author_id FROM public.resources WHERE id = resource_id));
+
+-- 9. QUIZ QUESTIONS
+-- ============================================================
+ALTER TABLE public.quiz_questions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Preguntas de quiz son públicas"
+  ON public.quiz_questions FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuarios pueden crear preguntas"
+  ON public.quiz_questions FOR INSERT
+  WITH CHECK (auth.uid() IN (
+    SELECT r.author_id FROM public.quizzes q
+    JOIN public.resources r ON r.id = q.resource_id
+    WHERE q.id = quiz_id
+  ));
+
+-- 10. STUDY PLANS
+-- ============================================================
+ALTER TABLE public.study_plans ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Usuario ve sus planes"
+  ON public.study_plans FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY "users_can_insert_own_careers"
-  ON careers FOR INSERT
+CREATE POLICY "Usuario crea sus planes"
+  ON public.study_plans FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "users_can_update_own_careers"
-  ON careers FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "users_can_delete_own_careers"
-  ON careers FOR DELETE
+CREATE POLICY "Usuario actualiza sus planes"
+  ON public.study_plans FOR UPDATE
   USING (auth.uid() = user_id);
 
--- ==================== SUBJECTS ====================
-CREATE POLICY "everyone_can_read_subjects"
-  ON subjects FOR SELECT
-  USING (TRUE);
+-- 11. STUDY SESSIONS
+-- ============================================================
+ALTER TABLE public.study_sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "admins_can_manage_subjects"
-  ON subjects FOR INSERT
-  WITH CHECK (TRUE);
-
-CREATE POLICY "admins_can_update_subjects"
-  ON subjects FOR UPDATE
-  USING (TRUE)
-  WITH CHECK (TRUE);
-
--- ==================== NOTES ====================
-CREATE POLICY "users_can_read_own_notes"
-  ON notes FOR SELECT
+CREATE POLICY "Usuario ve sus sesiones"
+  ON public.study_sessions FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY "users_can_insert_own_notes"
-  ON notes FOR INSERT
+CREATE POLICY "Usuario crea sus sesiones"
+  ON public.study_sessions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "users_can_update_own_notes"
-  ON notes FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+-- 12. COMMENTS
+-- ============================================================
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users_can_delete_own_notes"
-  ON notes FOR DELETE
+CREATE POLICY "Comentarios son públicos"
+  ON public.comments FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuario autenticado puede comentar"
+  ON public.comments FOR INSERT
+  WITH CHECK (auth.uid() = author_id);
+
+CREATE POLICY "Autor puede editar su comentario"
+  ON public.comments FOR UPDATE
+  USING (auth.uid() = author_id);
+
+-- 13. FAVORITES
+-- ============================================================
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Usuario ve sus favoritos"
+  ON public.favorites FOR SELECT
   USING (auth.uid() = user_id);
 
--- ==================== FLASHCARDS ====================
-CREATE POLICY "users_can_read_all_flashcards"
-  ON flashcards FOR SELECT
-  USING (TRUE);
-
-CREATE POLICY "users_can_insert_flashcards"
-  ON flashcards FOR INSERT
-  WITH CHECK (TRUE);
-
-CREATE POLICY "users_can_update_own_flashcards"
-  ON flashcards FOR UPDATE
-  USING (auth.uid() = user_id)
+CREATE POLICY "Usuario agrega favoritos"
+  ON public.favorites FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- ==================== QUIZZES ====================
-CREATE POLICY "users_can_read_all_quizzes"
-  ON quizzes FOR SELECT
-  USING (TRUE);
-
-CREATE POLICY "users_can_insert_quizzes"
-  ON quizzes FOR INSERT
-  WITH CHECK (TRUE);
-
-CREATE POLICY "users_can_update_own_quizzes"
-  ON quizzes FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== STUDY_SESSIONS ====================
-CREATE POLICY "users_can_read_own_sessions"
-  ON study_sessions FOR SELECT
+CREATE POLICY "Usuario elimina sus favoritos"
+  ON public.favorites FOR DELETE
   USING (auth.uid() = user_id);
 
-CREATE POLICY "users_can_insert_own_sessions"
-  ON study_sessions FOR INSERT
+-- 14. RATINGS
+-- ============================================================
+ALTER TABLE public.ratings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Valoraciones son públicas"
+  ON public.ratings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuario autenticado puede valorar"
+  ON public.ratings FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "users_can_delete_own_sessions"
-  ON study_sessions FOR DELETE
+CREATE POLICY "Usuario puede actualizar su valoración"
+  ON public.ratings FOR UPDATE
   USING (auth.uid() = user_id);
 
--- ==================== ACHIEVEMENTS ====================
-CREATE POLICY "users_can_read_own_achievements"
-  ON achievements FOR SELECT
+-- 15. HELP REQUESTS
+-- ============================================================
+ALTER TABLE public.help_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Solicitudes de ayuda son públicas"
+  ON public.help_requests FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuario crea solicitudes"
+  ON public.help_requests FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Autor o helper actualizan solicitud"
+  ON public.help_requests FOR UPDATE
+  USING (auth.uid() = user_id OR auth.uid() = helper_id);
+
+-- 16. AI JOBS
+-- ============================================================
+ALTER TABLE public.ai_jobs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Usuario ve sus jobs"
+  ON public.ai_jobs FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY "users_can_insert_own_achievements"
-  ON achievements FOR INSERT
+CREATE POLICY "Usuario crea jobs"
+  ON public.ai_jobs FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- ==================== XP_HISTORY ====================
-CREATE POLICY "users_can_read_own_xp"
-  ON xp_history FOR SELECT
+-- 17. ACADEMIC REPUTATIONS
+-- ============================================================
+ALTER TABLE public.academic_reputations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Reputaciones son públicas"
+  ON public.academic_reputations FOR SELECT
+  USING (true);
+
+CREATE POLICY "Usuario actualiza su reputación"
+  ON public.academic_reputations FOR UPDATE
   USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_insert_own_xp"
-  ON xp_history FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== STREAKS ====================
-CREATE POLICY "users_can_read_own_streaks"
-  ON streaks FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_streaks"
-  ON streaks FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== PETS ====================
-CREATE POLICY "users_can_read_own_pets"
-  ON pets FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_pets"
-  ON pets FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== SANCTUARY ====================
-CREATE POLICY "users_can_read_own_sanctuary"
-  ON sanctuary FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_sanctuary"
-  ON sanctuary FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== TREES ====================
-CREATE POLICY "users_can_read_own_trees"
-  ON trees FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_trees"
-  ON trees FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== INVENTORY ====================
-CREATE POLICY "users_can_read_own_inventory"
-  ON inventory FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_insert_own_inventory"
-  ON inventory FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_inventory"
-  ON inventory FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== SHOP_ITEMS ====================
-CREATE POLICY "everyone_can_read_shop"
-  ON shop_items FOR SELECT
-  USING (TRUE);
-
--- ==================== PURCHASES ====================
-CREATE POLICY "users_can_read_own_purchases"
-  ON purchases FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_insert_own_purchases"
-  ON purchases FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== STUDY_GROUPS ====================
-CREATE POLICY "members_can_read_groups"
-  ON study_groups FOR SELECT
-  USING (
-    auth.uid() = created_by OR
-    EXISTS (SELECT 1 FROM group_members WHERE group_id = id AND user_id = auth.uid())
-  );
-
-CREATE POLICY "users_can_create_groups"
-  ON study_groups FOR INSERT
-  WITH CHECK (auth.uid() = created_by);
-
--- ==================== GROUP_MEMBERS ====================
-CREATE POLICY "members_can_read_group_members"
-  ON group_members FOR SELECT
-  USING (
-    EXISTS (SELECT 1 FROM group_members WHERE group_id = group_id AND user_id = auth.uid())
-  );
-
--- ==================== MESSAGES ====================
-CREATE POLICY "members_can_read_messages"
-  ON messages FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM group_members gm
-      JOIN study_groups sg ON sg.id = gm.group_id
-      WHERE gm.group_id = messages.group_id AND gm.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "members_can_send_messages"
-  ON messages FOR INSERT
-  WITH CHECK (
-    auth.uid() = user_id AND
-    EXISTS (
-      SELECT 1 FROM group_members
-      WHERE group_id = messages.group_id AND user_id = auth.uid()
-    )
-  );
-
--- ==================== NOTIFICATIONS ====================
-CREATE POLICY "users_can_read_own_notifications"
-  ON notifications FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_notifications"
-  ON notifications FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== PREMIUM_SUBSCRIPTIONS ====================
-CREATE POLICY "users_can_read_own_subscription"
-  ON premium_subscriptions FOR SELECT
-  USING (auth.uid() = user_id);
-
--- ==================== SETTINGS ====================
-CREATE POLICY "users_can_read_own_settings"
-  ON settings FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_settings"
-  ON settings FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== CHALLENGES ====================
-CREATE POLICY "users_can_read_own_challenges"
-  ON challenges FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_insert_own_challenges"
-  ON challenges FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_challenges"
-  ON challenges FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== XP_BOOSTS ====================
-CREATE POLICY "users_can_read_own_boosts"
-  ON xp_boosts FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_boosts"
-  ON xp_boosts FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ==================== COSMETICS ====================
-CREATE POLICY "users_can_read_own_cosmetics"
-  ON cosmetics FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "users_can_update_own_cosmetics"
-  ON cosmetics FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);

@@ -1,134 +1,49 @@
--- LELOMS Storage Buckets Migration
--- Migration 003: Storage Buckets and Policies
+-- ============================================================
+-- LELOMS v16 - Storage buckets
+-- ============================================================
 
--- ==================== CREATE BUCKETS ====================
-INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', TRUE) ON CONFLICT DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('notes', 'notes', FALSE) ON CONFLICT DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('pdfs', 'pdfs', FALSE) ON CONFLICT DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('pets', 'pets', TRUE) ON CONFLICT DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('backgrounds', 'backgrounds', TRUE) ON CONFLICT DO NOTHING;
-INSERT INTO storage.buckets (id, name, public) VALUES ('community', 'community', TRUE) ON CONFLICT DO NOTHING;
+INSERT INTO storage.buckets (id, name, public)
+VALUES
+  ('avatars', 'avatars', true),
+  ('pdfs', 'pdfs', false),
+  ('summaries', 'summaries', false)
+ON CONFLICT (id) DO NOTHING;
 
--- ==================== STORAGE POLICIES ====================
--- AVATARS (public read, authenticated write)
-CREATE POLICY "anyone_can_read_avatars"
+-- AVATARS (público)
+CREATE POLICY "Avatars públicos"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
-CREATE POLICY "users_can_upload_own_avatar"
+CREATE POLICY "Usuarios pueden subir avatars"
   ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'avatars' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
 
-CREATE POLICY "users_can_update_own_avatar"
-  ON storage.objects FOR UPDATE
-  USING (
-    bucket_id = 'avatars' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-CREATE POLICY "users_can_delete_own_avatar"
+CREATE POLICY "Usuarios pueden eliminar sus avatars"
   ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'avatars' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  USING (bucket_id = 'avatars' AND auth.uid() = owner);
 
--- NOTES (private read/write for owner)
-CREATE POLICY "users_can_read_own_notes_files"
+-- PDFS (solo dueño)
+CREATE POLICY "Dueño ve sus PDFs"
   ON storage.objects FOR SELECT
-  USING (
-    bucket_id = 'notes' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  USING (bucket_id = 'pdfs' AND auth.uid() = owner);
 
-CREATE POLICY "users_can_upload_own_notes"
+CREATE POLICY "Usuarios pueden subir PDFs"
   ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'notes' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  WITH CHECK (bucket_id = 'pdfs' AND auth.role() = 'authenticated');
 
-CREATE POLICY "users_can_delete_own_notes"
+CREATE POLICY "Dueño elimina sus PDFs"
   ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'notes' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  USING (bucket_id = 'pdfs' AND auth.uid() = owner);
 
--- PDFS (private read/write for owner)
-CREATE POLICY "users_can_read_own_pdfs"
+-- SUMMARIES (solo dueño)
+CREATE POLICY "Dueño ve sus resúmenes"
   ON storage.objects FOR SELECT
-  USING (
-    bucket_id = 'pdfs' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  USING (bucket_id = 'summaries' AND auth.uid() = owner);
 
-CREATE POLICY "users_can_upload_own_pdfs"
+CREATE POLICY "Usuarios pueden subir resúmenes"
   ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'pdfs' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  WITH CHECK (bucket_id = 'summaries' AND auth.role() = 'authenticated');
 
-CREATE POLICY "users_can_delete_own_pdfs"
+CREATE POLICY "Dueño elimina sus resúmenes"
   ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'pdfs' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
-
--- PETS (public read, authenticated write)
-CREATE POLICY "anyone_can_read_pets"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'pets');
-
-CREATE POLICY "admins_can_upload_pets"
-  ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'pets' AND
-    auth.role() = 'authenticated'
-  );
-
--- BACKGROUNDS (public read, authenticated write)
-CREATE POLICY "anyone_can_read_backgrounds"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'backgrounds');
-
-CREATE POLICY "admins_can_upload_backgrounds"
-  ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'backgrounds' AND
-    auth.role() = 'authenticated'
-  );
-
--- COMMUNITY (public read, authenticated write)
-CREATE POLICY "anyone_can_read_community"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'community');
-
-CREATE POLICY "users_can_upload_community_files"
-  ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'community' AND
-    auth.role() = 'authenticated'
-  );
-
-CREATE POLICY "users_can_delete_own_community_files"
-  ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'community' AND
-    auth.role() = 'authenticated' AND
-    (storage.foldername(name))[1] = auth.uid()::text
-  );
+  USING (bucket_id = 'summaries' AND auth.uid() = owner);
